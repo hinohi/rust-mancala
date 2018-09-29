@@ -1,14 +1,23 @@
 use std::fmt::{self, Write};
+use std::io::{stdin, stdout, Write as IOWrite};
 use std::string::String;
 
 const PIT: usize = 6;
 const STONE: usize = 4;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 struct Board {
     side: usize,
     pits: [[usize; PIT]; 2],
     score: [usize; 2],
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum GameState {
+    InBattle,
+    WinA,
+    WinB,
+    Draw,
 }
 
 impl fmt::Display for Board {
@@ -20,21 +29,29 @@ impl fmt::Display for Board {
             s += "  |";
         }
         write!(s, "{:2}", self.score[1]).unwrap();
-        write!(s, "|{}|  |", self.pits[1].iter()
-            .rev()
-            .map(|p| format!("{:2}", *p))
-            .collect::<Vec<String>>()
-            .join("|")
+        write!(
+            s,
+            "|{}|  |",
+            self.pits[1]
+                .iter()
+                .rev()
+                .map(|p| format!("{:2}", *p))
+                .collect::<Vec<String>>()
+                .join("|")
         ).unwrap();
         if self.side == 0 {
             s += "\n* |  ";
         } else {
             s += "\n  |  ";
         }
-        write!(s, "|{}|", self.pits[0].iter()
-            .map(|p| format!("{:2}", *p))
-            .collect::<Vec<String>>()
-            .join("|")
+        write!(
+            s,
+            "|{}|",
+            self.pits[0]
+                .iter()
+                .map(|p| format!("{:2}", *p))
+                .collect::<Vec<String>>()
+                .join("|")
         ).unwrap();
         write!(s, "{:2}|\n", self.score[0]).unwrap();
         write!(dest, "{}", s)
@@ -48,6 +65,19 @@ impl Board {
             pits: [[STONE; PIT]; 2],
             score: [0; 2],
         }
+    }
+
+    fn get_state(&self) -> GameState {
+        if self.pits[0].iter().sum::<usize>() == 0 || self.pits[1].iter().sum::<usize>() == 0 {
+            if self.score[0] > self.score[1] {
+                return GameState::WinA;
+            } else if self.score[0] < self.score[1] {
+                return GameState::WinB;
+            } else {
+                return GameState::Draw;
+            }
+        }
+        GameState::InBattle
     }
 
     fn _move_stone(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
@@ -71,9 +101,23 @@ impl Board {
         }
     }
 
-    fn move_one(&mut self, pos: usize) -> usize {
+    fn check_pos(&self, pos: usize) -> Result<(), String> {
+        if pos >= PIT {
+            return Err(format!(
+                "0から{}の間で指定してください",
+                PIT - 1
+            ));
+        }
+        if self.pits[self.side][pos] == 0 {
+            return Err("そこには石が残っていません".to_string());
+        }
+        Ok(())
+    }
+
+    fn move_one(&mut self, pos: usize) {
         debug_assert!(pos < PIT);
         debug_assert!(self.pits[self.side][pos] > 0);
+        debug_assert!(self.get_state() == GameState::InBattle);
         let num = self.pits[self.side][pos];
         self.pits[self.side][pos] = 0;
         let side = self.side;
@@ -95,19 +139,30 @@ impl Board {
             next_side = 1 - self.side;
         }
         self.side = next_side;
-        next_side
     }
 }
 
 fn main() {
     let mut board = Board::new();
-    println!("{}", board);
-    board.move_one(2);
-    println!("{}", board);
-    board.move_one(5);
-    println!("{}", board);
-    board.move_one(5);
-    println!("{}", board);
-    board.move_one(0);
-    println!("{}", board);
+    while board.get_state() == GameState::InBattle {
+        println!("{}", board);
+        print!("your turn: ");
+        stdout().flush().unwrap();
+        let pos: usize;
+        loop {
+            let mut buf = String::new();
+            stdin().read_line(&mut buf).unwrap();
+            match buf.trim().parse() {
+                Ok(i) => match board.check_pos(i) {
+                    Ok(_) => {
+                        pos = i;
+                        break;
+                    }
+                    Err(e) => println!("{}", e),
+                },
+                Err(e) => println!("{}", e),
+            }
+        }
+        board.move_one(pos);
+    }
 }
