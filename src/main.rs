@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fmt::{self, Write};
 use std::io::{stdin, stdout, Write as IOWrite};
 use std::string::String;
@@ -140,16 +141,37 @@ impl Board {
         }
         self.side = next_side;
     }
+
+    fn list_next(&self) -> HashSet<Board> {
+        let mut set = HashSet::new();
+        let mut stack = vec![self.clone()];
+        while !stack.is_empty() {
+            let board = stack.pop().unwrap();
+            for pos in 0..PIT {
+                if !board.check_pos(pos).is_ok() {
+                    continue;
+                }
+                let mut copied = board.clone();
+                copied.move_one(pos);
+                if copied.side == self.side {
+                    stack.push(copied);
+                } else {
+                    set.insert(copied);
+                }
+            }
+        }
+        set
+    }
 }
 
-fn main() {
+fn interactive_game() {
     let mut board = Board::new();
     while board.get_state() == GameState::InBattle {
         println!("{}", board);
-        print!("your turn: ");
-        stdout().flush().unwrap();
         let pos: usize;
         loop {
+            print!("your turn: ");
+            stdout().flush().unwrap();
             let mut buf = String::new();
             stdin().read_line(&mut buf).unwrap();
             match buf.trim().parse() {
@@ -164,5 +186,12 @@ fn main() {
             }
         }
         board.move_one(pos);
+    }
+}
+
+fn main() {
+    let board = Board::new();
+    for nex in board.list_next() {
+        println!("{}", nex);
     }
 }
