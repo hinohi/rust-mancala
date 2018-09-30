@@ -31,7 +31,8 @@ fn interactive_game() {
 
 fn main() {
     let board = Board::new();
-    for nex in board.list_next() {
-        println!("{}", nex);
+    for (nex_board, pos_list) in board.list_next() {
+        println!("{:?}", pos_list);
+        println!("{}", nex_board);
     }
 }

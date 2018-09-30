@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::fmt::{self, Write};
 
 pub const PIT: usize = 6;
@@ -140,27 +140,29 @@ impl Board {
         self.side = next_side;
     }
 
-    pub fn list_next(&self) -> HashSet<Board> {
-        let mut set = HashSet::new();
+    pub fn list_next(&self) -> HashMap<Board, Vec<usize>> {
+        let mut map = HashMap::new();
         if self.get_state() != GameState::InBattle {
-            return set;
+            return map;
         }
-        let mut stack = vec![self.clone()];
+        let mut stack = vec![(self.clone(), vec![])];
         while !stack.is_empty() {
-            let board = stack.pop().unwrap();
+            let (board, pos_list) = stack.pop().unwrap();
             for pos in 0..PIT {
                 if !board.check_pos(pos).is_ok() {
                     continue;
                 }
                 let mut copied = board.clone();
+                let mut copied_pos = pos_list.clone();
                 copied.move_one(pos);
+                copied_pos.push(pos);
                 if copied.side == self.side {
-                    stack.push(copied);
+                    stack.push((copied, copied_pos));
                 } else {
-                    set.insert(copied);
+                    map.entry(copied).or_insert(copied_pos);
                 }
             }
         }
-        set
+        map
     }
 }
