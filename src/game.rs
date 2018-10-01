@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Write};
 
 pub const PIT: usize = 6;
@@ -6,7 +6,7 @@ pub const STONE: usize = 4;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Board {
-    side: usize,
+    pub side: usize,
     pits: [[usize; PIT]; 2],
     score: [usize; 2],
 }
@@ -52,7 +52,7 @@ impl fmt::Display for Board {
                 .collect::<Vec<String>>()
                 .join("|")
         ).unwrap();
-        write!(s, "{:2}|\n", self.score[0]).unwrap();
+        write!(s, "{:2}|", self.score[0]).unwrap();
         write!(dest, "{}", s)
     }
 }
@@ -77,6 +77,10 @@ impl Board {
             }
         }
         GameState::InBattle
+    }
+
+    pub fn get_scores(&self) -> (usize, usize) {
+        (self.score[0], self.score[1])
     }
 
     fn _move_stone(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
@@ -140,7 +144,31 @@ impl Board {
         self.side = next_side;
     }
 
-    pub fn list_next(&self) -> HashMap<Board, Vec<usize>> {
+    pub fn list_next(&self) -> HashSet<Board> {
+        let mut set = HashSet::new();
+        if self.get_state() != GameState::InBattle {
+            return set;
+        }
+        let mut stack = vec![self.clone()];
+        while !stack.is_empty() {
+            let board = stack.pop().unwrap();
+            for pos in 0..PIT {
+                if !board.check_pos(pos).is_ok() {
+                    continue;
+                }
+                let mut copied = board.clone();
+                copied.move_one(pos);
+                if copied.side == self.side {
+                    stack.push(copied);
+                } else {
+                    set.insert(copied);
+                }
+            }
+        }
+        set
+    }
+
+    pub fn list_next_with_pos(&self) -> HashMap<Board, Vec<usize>> {
         let mut map = HashMap::new();
         if self.get_state() != GameState::InBattle {
             return map;
@@ -156,7 +184,7 @@ impl Board {
                 let mut copied_pos = pos_list.clone();
                 copied.move_one(pos);
                 copied_pos.push(pos);
-                if copied.side == self.side {
+                if copied.get_state() == GameState::InBattle && copied.side == self.side {
                     stack.push((copied, copied_pos));
                 } else {
                     map.entry(copied).or_insert(copied_pos);
@@ -164,5 +192,47 @@ impl Board {
             }
         }
         map
+    }
+}
+
+pub struct NextBoardIter {
+    stack: Vec<(Board, usize)>,
+}
+
+impl<'a> IntoIterator for &'a Board {
+    type Item = Board;
+    type IntoIter = NextBoardIter;
+    fn into_iter(self) -> Self::IntoIter {
+        NextBoardIter {
+            stack: vec![(self.clone(), 0)],
+        }
+    }
+}
+
+impl Iterator for NextBoardIter {
+    type Item = Board;
+    fn next(&mut self) -> Option<Self::Item> {
+        while !self.stack.is_empty() {
+            let (board, start) = self.stack.pop().unwrap();
+            if board.get_state() != GameState::InBattle {
+                continue;
+            }
+            for pos in start..PIT {
+                if !board.check_pos(pos).is_ok() {
+                    continue;
+                }
+                let mut copied = board.clone();
+                copied.move_one(pos);
+                if copied.side == board.side {
+                    self.stack.push((copied, 0));
+                } else {
+                    if pos != PIT - 1 {
+                        self.stack.push((board, pos + 1))
+                    }
+                    return Some(copied);
+                }
+            }
+        }
+        None
     }
 }
