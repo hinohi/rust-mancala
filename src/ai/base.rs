@@ -36,14 +36,16 @@ impl Judge {
         self.board.get_state()
     }
 
-    pub fn run(&mut self) -> GameState {
+    pub fn run(&mut self) -> (GameState, usize, usize) {
         if self.board.get_state() != GameState::InBattle {
-            return self.board.get_state();
+            let s = self.board.get_scores();
+            return (self.board.get_state(), s.0, s.1);
         }
         loop {
             let state = self.proceed();
             if state != GameState::InBattle {
-                return state;
+                let s = self.board.get_scores();
+                return (state, s.0, s.1);
             }
         }
     }

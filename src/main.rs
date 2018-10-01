@@ -27,6 +27,7 @@ fn main() {
         let ai_a = factory(0, &cmd_a);
         let ai_b = factory(1, &cmd_b);
         let mut judge = Judge::new(ai_a, ai_b);
-        println!("{:?}", judge.run());
+        let result = judge.run();
+        println!("{:?} {} {}", result.0, result.1, result.2);
     }
 }

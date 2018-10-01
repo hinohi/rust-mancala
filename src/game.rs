@@ -62,7 +62,7 @@ impl Board {
         Board {
             side: 0,
             pits: [[STONE; PIT]; 2],
-            score: [0; 2],
+            score: [0, 0],
         }
     }
 

@@ -13,10 +13,27 @@ impl DepthSearchAI {
 
     fn score(&self, board: &Board) -> i32 {
         let (sa, sb) = board.get_scores();
+        let state = board.get_state();
         if board.side == 0 {
-            sa as i32 - sb as i32
+            if state == GameState::InBattle {
+                sa as i32 - sb as i32
+            } else if state == GameState::WinA {
+                100
+            } else if state == GameState::WinB {
+                -100
+            } else {
+                0
+            }
         } else {
-            sb as i32 - sa as i32
+            if state == GameState::InBattle {
+                sb as i32 - sa as i32
+            } else if state == GameState::WinA {
+                -100
+            } else if state == GameState::WinB {
+                100
+            } else {
+                0
+            }
         }
     }
     fn search(&self, board: Board, depth: u32) -> i32 {
