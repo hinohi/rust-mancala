@@ -223,7 +223,7 @@ impl Iterator for NextBoardIter {
                 }
                 let mut copied = board.clone();
                 copied.move_one(pos);
-                if copied.side == board.side {
+                if copied.get_state() == GameState::InBattle && copied.side == board.side {
                     self.stack.push((copied, 0));
                 } else {
                     if pos != PIT - 1 {

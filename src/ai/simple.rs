@@ -6,7 +6,7 @@ use game::*;
 pub struct InteractiveAI {}
 
 impl InteractiveAI {
-    pub fn new() -> InteractiveAI {
+    pub fn new(_: usize) -> InteractiveAI {
         InteractiveAI {}
     }
 }
@@ -35,7 +35,7 @@ impl AI for InteractiveAI {
 pub struct RandomAI {}
 
 impl RandomAI {
-    pub fn new() -> RandomAI {
+    pub fn new(_: usize) -> RandomAI {
         RandomAI {}
     }
 }
@@ -43,9 +43,6 @@ impl RandomAI {
 impl AI for RandomAI {
     fn think(&mut self, board: &Board) -> Vec<usize> {
         let mut next_map = board.list_next_with_pos();
-        if next_map.is_empty() {
-            println!("{}", board);
-        }
         let key = next_map.keys().next().unwrap().clone();
         next_map.remove(&key).unwrap()
     }
