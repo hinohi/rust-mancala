@@ -2,13 +2,13 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Write};
 
 pub const PIT: usize = 6;
-pub const STONE: usize = 4;
+pub const STONE: u8 = 4;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Board {
-    pub side: usize,
-    pits: [[usize; PIT]; 2],
-    score: [usize; 2],
+    pub side: u8,
+    pits: [[u8; PIT]; 2],
+    score: [u8; 2],
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -67,7 +67,7 @@ impl Board {
     }
 
     pub fn get_state(&self) -> GameState {
-        if self.pits[0].iter().sum::<usize>() == 0 || self.pits[1].iter().sum::<usize>() == 0 {
+        if self.pits[0].iter().sum::<u8>() == 0 || self.pits[1].iter().sum::<u8>() == 0 {
             if self.score[0] > self.score[1] {
                 return GameState::WinA;
             } else if self.score[0] < self.score[1] {
@@ -79,7 +79,7 @@ impl Board {
         GameState::InBattle
     }
 
-    pub fn get_scores(&self) -> (usize, usize) {
+    pub fn get_scores(&self) -> (u8, u8) {
         (self.score[0], self.score[1])
     }
 
@@ -93,7 +93,7 @@ impl Board {
         for i in pos..PIT {
             self.pits[side][i] += 1;
         }
-        if self.side == side {
+        if self.side == side as u8 {
             self.score[side] += 1;
             if pos + num == PIT + 1 {
                 return (side, PIT);
@@ -111,7 +111,7 @@ impl Board {
                 PIT - 1
             ));
         }
-        if self.pits[self.side][pos] == 0 {
+        if self.pits[self.side as usize][pos] == 0 {
             return Err("そこには石が残っていません".to_string());
         }
         Ok(())
@@ -119,14 +119,14 @@ impl Board {
 
     pub fn move_one(&mut self, pos: usize) {
         debug_assert!(pos < PIT);
-        debug_assert!(self.pits[self.side][pos] > 0);
+        debug_assert!(self.pits[self.side as usize][pos] > 0);
         debug_assert!(self.get_state() == GameState::InBattle);
-        let num = self.pits[self.side][pos];
-        self.pits[self.side][pos] = 0;
-        let side = self.side;
+        let num = self.pits[self.side as usize][pos];
+        self.pits[self.side as usize][pos] = 0;
+        let side = self.side as usize;
         let (side, end_pos) = self._move_stone(side, pos + 1 as usize, num as usize);
         let next_side;
-        if side == self.side {
+        if side as u8 == self.side {
             if end_pos == PIT {
                 next_side = self.side;
             } else {
