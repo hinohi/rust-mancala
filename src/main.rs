@@ -1,3 +1,9 @@
+#[macro_use]
+extern crate serde_derive;
+
+extern crate rmp_serde;
+extern crate serde;
+
 mod ai;
 mod game;
 mod learn;
@@ -17,7 +23,6 @@ fn factory(side: usize, cmd: &str) -> Box<AI> {
     panic!("unknown AI: {}", cmd);
 }
 
-
 fn battle(args: &[String]) {
     let n = args[0].parse().unwrap();
     let cmd_a = &args[1];
@@ -31,23 +36,26 @@ fn battle(args: &[String]) {
     }
 }
 
-
 fn learn(args: &[String]) {
     let n = args[0].parse().unwrap();
-    let mut s = Searcher::new();
+    let mut s = Searcher::new(&args[1]);
+    s.info();
     for _ in 0..n {
         s.single_run();
     }
-//    s.dump();
+    s.info();
+    s.dump(&args[1]);
 }
 
 fn main() {
     let args: Vec<_> = std::env::args().skip(1).collect();
     if args.len() == 0 {
-        panic!(r#"Usage:
+        panic!(
+            r#"Usage:
   ./cmd battle N AI_a AI_b
   ./cmd learn N
-"#);
+"#
+        );
     }
     if args[0] == "battle" {
         battle(&args[1..]);

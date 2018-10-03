@@ -146,7 +146,6 @@ impl Board {
                 let opposite_num = self.pits[1 - side][opposite_pos];
                 self.pits[1 - side][opposite_pos] = 0;
                 self.score[side] += opposite_num;
-
             }
         }
         self.side = 1 - self.side;

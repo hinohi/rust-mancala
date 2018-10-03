@@ -1,22 +1,27 @@
-use std::collections::BTreeMap;
 use game::*;
+use rmp_serde;
+use serde::Serialize;
+use std::collections::BTreeMap;
+use std::fs::File;
+use std::i32;
+use std::io::{BufReader, BufWriter};
 
-
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Searcher {
     map: BTreeMap<[u8; PIT * 2], i32>,
 }
 
 impl Searcher {
-    pub fn new() -> Searcher {
-        Searcher {
-            map: BTreeMap::new(),
-        }
+    pub fn new(file: &str) -> Searcher {
+        let f = File::open(file).unwrap();
+        let reader = BufReader::new(f);
+        rmp_serde::from_read(reader).unwrap()
     }
 
     fn _get_score(&self, board: &Board) -> i32 {
         let (s1, s2) = board.get_scores();
         if board.side == 0 {
-            s1 as i32  - s2 as i32
+            s1 as i32 - s2 as i32
         } else {
             s2 as i32 - s1 as i32
         }
@@ -34,7 +39,7 @@ impl Searcher {
         if depth == 0 {
             return None;
         }
-        let mut best = std::i32::MIN;
+        let mut best = i32::MIN;
         let mut ok = true;
         for next in board.into_iter() {
             let score = self.search(&next, depth - 1);
@@ -59,18 +64,24 @@ impl Searcher {
     pub fn single_run(&mut self) {
         let mut board = Board::new();
         while board.get_state() == GameState::InBattle {
-            self.search(&board, 2);
+            if self.search(&board, 4).is_some() {
+                return;
+            }
             let next_map = board.list_next_with_pos();
             for pos in next_map.values().next().unwrap() {
                 board.move_one(*pos);
             }
         }
+    }
+
+    pub fn info(&self) {
         println!("{}", self.map.len());
     }
 
-    pub fn dump(&self) {
-        for (key, value) in &self.map {
-            println!("{:?} {}", key, value);
-        }
+    pub fn dump(&self, file: &str) {
+        let f = File::create(file).unwrap();
+        let writer = BufWriter::new(f);
+        let mut s = rmp_serde::Serializer::new(writer);
+        self.serialize(&mut s).unwrap();
     }
 }
