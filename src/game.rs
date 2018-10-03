@@ -83,6 +83,17 @@ impl Board {
         (self.score[0], self.score[1])
     }
 
+    pub fn get_rest_stone(&self) -> [u8; PIT * 2] {
+        let mut ret = [0; PIT * 2];
+        for i in 0..PIT {
+            ret[i] = self.pits[self.side as usize][i];
+        }
+        for i in 0..PIT {
+            ret[PIT + i] = self.pits[1 - self.side as usize][i];
+        }
+        ret
+    }
+
     fn _move_stone(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
         if pos + num <= PIT {
             for i in pos..pos + num {
@@ -125,23 +136,20 @@ impl Board {
         self.pits[self.side as usize][pos] = 0;
         let side = self.side as usize;
         let (side, end_pos) = self._move_stone(side, pos + 1 as usize, num as usize);
-        let next_side;
         if side as u8 == self.side {
             if end_pos == PIT {
-                next_side = self.side;
-            } else {
-                next_side = 1 - self.side;
-                if self.pits[side][end_pos] == 1 {
-                    let opposite_pos = PIT - 1 - end_pos;
-                    let opposite_num = self.pits[1 - side][opposite_pos];
-                    self.pits[1 - side][opposite_pos] = 0;
-                    self.score[side] += opposite_num;
+                if self.get_state() == GameState::InBattle {
+                    self.side = 1 - self.side;
                 }
+            } else if self.pits[side][end_pos] == 1 {
+                let opposite_pos = PIT - 1 - end_pos;
+                let opposite_num = self.pits[1 - side][opposite_pos];
+                self.pits[1 - side][opposite_pos] = 0;
+                self.score[side] += opposite_num;
+
             }
-        } else {
-            next_side = 1 - self.side;
         }
-        self.side = next_side;
+        self.side = 1 - self.side;
     }
 
     pub fn list_next(&self) -> HashSet<Board> {
@@ -223,7 +231,7 @@ impl Iterator for NextBoardIter {
                 }
                 let mut copied = board.clone();
                 copied.move_one(pos);
-                if copied.get_state() == GameState::InBattle && copied.side == board.side {
+                if copied.side == board.side {
                     self.stack.push((copied, 0));
                 } else {
                     if pos != PIT - 1 {
