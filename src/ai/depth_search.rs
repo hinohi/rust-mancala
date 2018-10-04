@@ -62,6 +62,7 @@ impl AI for DepthSearchAI {
                 best = pos_list;
             }
         }
+        println!("{}", best_score);
         best
     }
 }

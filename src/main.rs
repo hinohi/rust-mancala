@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate serde_derive;
-
 extern crate rmp_serde;
 extern crate serde;
+#[macro_use]
+extern crate lazy_static;
 
 mod ai;
 mod game;
@@ -19,6 +20,9 @@ fn factory(side: usize, cmd: &str) -> Box<AI> {
     } else if cmd.starts_with("depth") {
         let depth: u32 = cmd[5..].parse().unwrap();
         return Box::new(DepthSearchAI::new(side, depth));
+    } else if cmd.starts_with("mem") {
+        let depth: u32 = cmd[3..].parse().unwrap();
+        return Box::new(MemAI::new(side, depth));
     }
     panic!("unknown AI: {}", cmd);
 }

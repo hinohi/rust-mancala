@@ -7,3 +7,5 @@ authors = ["Daiju Nakayama <42.daiju@gmail.com>"]
 serde = "*"
 serde_derive = "*"
 rmp-serde = "*"
+lazy_static = "*"
+

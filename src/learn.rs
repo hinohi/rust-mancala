@@ -18,6 +18,15 @@ impl Searcher {
         rmp_serde::from_read(reader).unwrap()
     }
 
+    pub fn get_score(&self, board: &Board) -> Option<i32> {
+        let key = board.get_rest_stone();
+        if let Some(s) = self.map.get(&key) {
+            Some(s + self._get_score(board))
+        } else {
+            None
+        }
+    }
+
     fn _get_score(&self, board: &Board) -> i32 {
         let (s1, s2) = board.get_scores();
         if board.side == 0 {
