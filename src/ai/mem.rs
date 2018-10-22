@@ -4,7 +4,7 @@ use learn::Searcher;
 use std::i32;
 
 lazy_static! {
-    static ref LEARNED: Searcher = Searcher::new("learned.msgpack");
+    static ref LEARNED: Searcher = Searcher::from_file("learned.msgpack");
 }
 
 pub struct MemAI {

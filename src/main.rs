@@ -8,9 +8,9 @@ extern crate lazy_static;
 mod ai;
 mod game;
 mod learn;
-mod tool;
 
 use ai::*;
+use game::Board;
 use learn::*;
 use std::time::SystemTime;
 
@@ -45,7 +45,7 @@ fn battle(args: &[String]) {
 fn learn(args: &[String]) {
     let start = SystemTime::now();
     let n = args[0].parse().unwrap();
-    let mut s = Searcher::new(&args[1]);
+    let mut s = Searcher::from_file(&args[1]);
     println!(
         "[{:5}] read done: {}",
         start.elapsed().unwrap().as_secs(),
@@ -67,6 +67,16 @@ fn learn(args: &[String]) {
     println!("[{:5}] dump done", start.elapsed().unwrap().as_secs());
 }
 
+fn all_learn(args: &[String]) {
+    let start = SystemTime::now();
+    let mut s = Searcher::new();
+    let board = Board::new();
+    let score = s.search(&board, 1000);
+    s.dump(&args[0]);
+    println!("score={:?} size={}", score, s.info());
+    println!("[{:5}] dump done", start.elapsed().unwrap().as_secs());
+}
+
 fn main() {
     let args: Vec<_> = std::env::args().skip(1).collect();
     if args.len() == 0 {
@@ -74,6 +84,7 @@ fn main() {
             r#"Usage:
   ./cmd battle N AI_a AI_b
   ./cmd learn N
+  ./cmd all
 "#
         );
     }
@@ -81,5 +92,7 @@ fn main() {
         battle(&args[1..]);
     } else if args[0] == "learn" {
         learn(&args[1..]);
+    } else if args[0] == "all" {
+        all_learn(&args[1..]);
     }
 }

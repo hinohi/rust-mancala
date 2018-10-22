@@ -12,10 +12,16 @@ pub struct Searcher {
 }
 
 impl Searcher {
-    pub fn new(file: &str) -> Searcher {
+    pub fn from_file(file: &str) -> Searcher {
         let f = File::open(file).unwrap();
         let reader = BufReader::new(f);
         rmp_serde::from_read(reader).unwrap()
+    }
+
+    pub fn new() -> Searcher {
+        Searcher {
+            map: HashMap::new(),
+        }
     }
 
     pub fn get_score(&self, board: &Board) -> Option<i32> {
@@ -36,7 +42,7 @@ impl Searcher {
         }
     }
 
-    fn search(&mut self, board: &Board, depth: u32) -> Option<i32> {
+    pub fn search(&mut self, board: &Board, depth: u32) -> Option<i32> {
         let key = board.get_rest_stone();
         if self.map.contains_key(&key) {
             return Some(self._get_score(board) + self.map[&key]);
