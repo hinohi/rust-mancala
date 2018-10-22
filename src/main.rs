@@ -8,9 +8,11 @@ extern crate lazy_static;
 mod ai;
 mod game;
 mod learn;
+mod tool;
 
 use ai::*;
 use learn::*;
+use std::time::SystemTime;
 
 fn factory(side: usize, cmd: &str) -> Box<AI> {
     if cmd == "interactive" {
@@ -41,14 +43,28 @@ fn battle(args: &[String]) {
 }
 
 fn learn(args: &[String]) {
+    let start = SystemTime::now();
     let n = args[0].parse().unwrap();
     let mut s = Searcher::new(&args[1]);
-    s.info();
-    for _ in 0..n {
+    println!(
+        "[{:5}] read done: {}",
+        start.elapsed().unwrap().as_secs(),
+        s.info()
+    );
+    for i in 0..n {
         s.single_run();
+        if (i + 1) % (n / 10) == 0 {
+            println!(
+                "[{:5}] {}/{} done: {}",
+                start.elapsed().unwrap().as_secs(),
+                i + 1,
+                n,
+                s.info()
+            );
+        }
     }
-    s.info();
     s.dump(&args[1]);
+    println!("[{:5}] dump done", start.elapsed().unwrap().as_secs());
 }
 
 fn main() {

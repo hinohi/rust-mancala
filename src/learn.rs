@@ -1,14 +1,14 @@
 use game::*;
 use rmp_serde;
 use serde::Serialize;
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::fs::File;
 use std::i32;
 use std::io::{BufReader, BufWriter};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Searcher {
-    map: BTreeMap<[u8; PIT * 2], i32>,
+    map: HashMap<[u8; PIT * 2], i32>,
 }
 
 impl Searcher {
@@ -70,10 +70,9 @@ impl Searcher {
         }
     }
 
-    pub fn single_run(&mut self) {
-        let mut board = Board::new();
+    fn random_search(&mut self, mut board: Board) {
         while board.get_state() == GameState::InBattle {
-            if self.search(&board, 4).is_some() {
+            if self.search(&board, 3).is_some() {
                 return;
             }
             let next_map = board.list_next_with_pos();
@@ -83,8 +82,22 @@ impl Searcher {
         }
     }
 
-    pub fn info(&self) {
-        println!("{}", self.map.len());
+    pub fn single_run(&mut self) {
+        let mut stack = vec![(Board::new(), 0)];
+        while !stack.is_empty() {
+            let (board, depth) = stack.pop().unwrap();
+            if depth < 3 {
+                for next in board.list_next() {
+                    stack.push((next, depth + 1));
+                }
+            } else {
+                self.random_search(board);
+            }
+        }
+    }
+
+    pub fn info(&self) -> usize {
+        self.map.len()
     }
 
     pub fn dump(&self, file: &str) {

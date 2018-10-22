@@ -18,9 +18,9 @@ impl DepthSearchAI {
             if state == GameState::InBattle {
                 sa as i32 - sb as i32
             } else if state == GameState::WinA {
-                100
+                100 + sa as i32 - sb as i32
             } else if state == GameState::WinB {
-                -100
+                -100 + sa as i32 - sb as i32
             } else {
                 0
             }
@@ -28,9 +28,9 @@ impl DepthSearchAI {
             if state == GameState::InBattle {
                 sb as i32 - sa as i32
             } else if state == GameState::WinA {
-                -100
+                -100 + sb as i32 - sa as i32
             } else if state == GameState::WinB {
-                100
+                100 + sb as i32 - sa as i32
             } else {
                 0
             }
@@ -62,7 +62,6 @@ impl AI for DepthSearchAI {
                 best = pos_list;
             }
         }
-        println!("{}", best_score);
         best
     }
 }

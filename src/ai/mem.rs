@@ -1,7 +1,7 @@
 use super::base::*;
 use game::*;
-use std::i32;
 use learn::Searcher;
+use std::i32;
 
 lazy_static! {
     static ref LEARNED: Searcher = Searcher::new("learned.msgpack");
@@ -65,8 +65,10 @@ impl AI for MemAI {
         }
         println!(
             "total=({}, {}) diff=({}, {}) score={}",
-            self.searched, self.hit,
-            self.searched - s, self.hit - h,
+            self.searched,
+            self.hit,
+            self.searched - s,
+            self.hit - h,
             best_score,
         );
         best
