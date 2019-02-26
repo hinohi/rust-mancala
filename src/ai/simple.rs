@@ -42,8 +42,7 @@ impl RandomAI {
 
 impl AI for RandomAI {
     fn think(&mut self, board: &Board) -> Vec<usize> {
-        let mut next_map = board.list_next_with_pos();
-        let key = next_map.keys().next().unwrap().clone();
-        next_map.remove(&key).unwrap()
+        let next_map = board.list_next_with_pos();
+        next_map.values().next().unwrap().clone()
     }
 }
