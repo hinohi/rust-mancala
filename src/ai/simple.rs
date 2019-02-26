@@ -1,12 +1,12 @@
 use std::io::{stderr, stdin, Write};
 
 use super::base::*;
-use game::*;
+use crate::game::*;
 
-pub struct InteractiveAI {}
+pub struct InteractiveAI;
 
 impl InteractiveAI {
-    pub fn new(_: usize) -> InteractiveAI {
+    pub fn new() -> InteractiveAI {
         InteractiveAI {}
     }
 }
@@ -32,10 +32,10 @@ impl AI for InteractiveAI {
     }
 }
 
-pub struct RandomAI {}
+pub struct RandomAI;
 
 impl RandomAI {
-    pub fn new(_: usize) -> RandomAI {
+    pub fn new() -> RandomAI {
         RandomAI {}
     }
 }

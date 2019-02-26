@@ -1,13 +1,14 @@
-use super::base::*;
-use game::*;
 use std::i32;
+
+use super::base::*;
+use crate::game::*;
 
 pub struct DepthSearchAI {
     max_depth: u32,
 }
 
 impl DepthSearchAI {
-    pub fn new(_: usize, max_depth: u32) -> DepthSearchAI {
+    pub fn new(max_depth: u32) -> DepthSearchAI {
         DepthSearchAI { max_depth }
     }
 
@@ -41,7 +42,7 @@ impl DepthSearchAI {
             return self.score(&board);
         }
         let mut best = i32::MIN;
-        for next in board.into_iter() {
+        for next in board.list_next() {
             let s = -self.search(next, depth - 1);
             if s > best {
                 best = s;

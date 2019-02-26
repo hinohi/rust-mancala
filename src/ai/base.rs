@@ -1,18 +1,26 @@
-use game::*;
+use crate::game::*;
 
 pub trait AI {
     fn think(&mut self, board: &Board) -> Vec<usize>;
 }
 
-pub struct Judge {
+pub struct Judge<A, B>
+where
+    A: AI,
+    B: AI,
+{
     board: Board,
     turn: u32,
-    ai_a: Box<AI>,
-    ai_b: Box<AI>,
+    ai_a: A,
+    ai_b: B,
 }
 
-impl Judge {
-    pub fn new(ai_a: Box<AI>, ai_b: Box<AI>) -> Judge {
+impl<A, B> Judge<A, B>
+where
+    A: AI,
+    B: AI,
+{
+    pub fn new(ai_a: A, ai_b: B) -> Judge<A, B> {
         Judge {
             board: Board::new(),
             turn: 0,

@@ -6,7 +6,7 @@ pub const STONE: u8 = 4;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Board {
-    pub side: u8,
+    pub side: usize,
     pits: [[u8; PIT]; 2],
     score: [u8; 2],
 }
@@ -37,7 +37,8 @@ impl fmt::Display for Board {
                 .map(|p| format!("{:2}", *p))
                 .collect::<Vec<String>>()
                 .join("|")
-        ).unwrap();
+        )
+        .unwrap();
         if self.side == 0 {
             s += "\n* |  ";
         } else {
@@ -51,7 +52,8 @@ impl fmt::Display for Board {
                 .map(|p| format!("{:2}", *p))
                 .collect::<Vec<String>>()
                 .join("|")
-        ).unwrap();
+        )
+        .unwrap();
         write!(s, "{:2}|", self.score[0]).unwrap();
         write!(dest, "{}", s)
     }
@@ -94,7 +96,7 @@ impl Board {
         ret
     }
 
-    fn _move_stone(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
+    fn move_stone(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
         if pos + num <= PIT {
             for i in pos..pos + num {
                 self.pits[side][i] += 1;
@@ -104,14 +106,14 @@ impl Board {
         for i in pos..PIT {
             self.pits[side][i] += 1;
         }
-        if self.side == side as u8 {
+        if self.side == side {
             self.score[side] += 1;
             if pos + num == PIT + 1 {
                 return (side, PIT);
             }
-            self._move_stone(1 - side, 0, pos + num - PIT - 1)
+            self.move_stone(1 - side, 0, pos + num - PIT - 1)
         } else {
-            self._move_stone(1 - side, 0, pos + num - PIT)
+            self.move_stone(1 - side, 0, pos + num - PIT)
         }
     }
 
@@ -122,7 +124,7 @@ impl Board {
                 PIT - 1
             ));
         }
-        if self.pits[self.side as usize][pos] == 0 {
+        if self.pits[self.side][pos] == 0 {
             return Err("そこには石が残っていません".to_string());
         }
         Ok(())
@@ -133,10 +135,9 @@ impl Board {
         debug_assert!(self.pits[self.side as usize][pos] > 0);
         debug_assert!(self.get_state() == GameState::InBattle);
         let num = self.pits[self.side as usize][pos];
-        self.pits[self.side as usize][pos] = 0;
-        let side = self.side as usize;
-        let (side, end_pos) = self._move_stone(side, pos + 1 as usize, num as usize);
-        if side as u8 == self.side {
+        self.pits[self.side][pos] = 0;
+        let (side, end_pos) = self.move_stone(self.side, pos + 1 as usize, num as usize);
+        if side == self.side {
             if end_pos == PIT {
                 if self.get_state() == GameState::InBattle {
                     self.side = 1 - self.side;
@@ -199,47 +200,5 @@ impl Board {
             }
         }
         map
-    }
-}
-
-pub struct NextBoardIter {
-    stack: Vec<(Board, usize)>,
-}
-
-impl<'a> IntoIterator for &'a Board {
-    type Item = Board;
-    type IntoIter = NextBoardIter;
-    fn into_iter(self) -> Self::IntoIter {
-        NextBoardIter {
-            stack: vec![(self.clone(), 0)],
-        }
-    }
-}
-
-impl Iterator for NextBoardIter {
-    type Item = Board;
-    fn next(&mut self) -> Option<Self::Item> {
-        while !self.stack.is_empty() {
-            let (board, start) = self.stack.pop().unwrap();
-            if board.get_state() != GameState::InBattle {
-                continue;
-            }
-            for pos in start..PIT {
-                if !board.check_pos(pos).is_ok() {
-                    continue;
-                }
-                let mut copied = board.clone();
-                copied.move_one(pos);
-                if copied.side == board.side {
-                    self.stack.push((copied, 0));
-                } else {
-                    if pos != PIT - 1 {
-                        self.stack.push((board, pos + 1))
-                    }
-                    return Some(copied);
-                }
-            }
-        }
-        None
     }
 }

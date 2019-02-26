@@ -2,10 +2,6 @@
 name = "mancala-rust"
 version = "0.1.0"
 authors = ["Daiju Nakayama <42.daiju@gmail.com>"]
+edition = "2018"
 
 [dependencies]
-serde = "*"
-serde_derive = "*"
-rmp-serde = "*"
-lazy_static = "*"
-
