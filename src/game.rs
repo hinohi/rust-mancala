@@ -81,6 +81,10 @@ impl Board {
         GameState::InBattle
     }
 
+    pub fn is_finished(&self) -> bool {
+        self.pits[0].iter().all(|s| *s == 0) || self.pits[1].iter().all(|s| *s == 0)
+    }
+
     pub fn get_scores(&self) -> (u8, u8) {
         (self.score[0], self.score[1])
     }
@@ -139,7 +143,7 @@ impl Board {
         let (side, end_pos) = self.move_stone(self.side, pos + 1 as usize, num as usize);
         if side == self.side {
             if end_pos == PIT {
-                if self.get_state() == GameState::InBattle {
+                if !self.is_finished() {
                     self.side = 1 - self.side;
                 }
             } else if self.pits[side][end_pos] == 1 {
@@ -154,7 +158,7 @@ impl Board {
 
     pub fn list_next(&self) -> HashSet<Board> {
         let mut set = HashSet::new();
-        if self.get_state() != GameState::InBattle {
+        if self.is_finished() {
             return set;
         }
         let mut stack = vec![self.clone()];
@@ -178,7 +182,7 @@ impl Board {
 
     pub fn list_next_with_pos(&self) -> HashMap<Board, Vec<usize>> {
         let mut map = HashMap::new();
-        if self.get_state() != GameState::InBattle {
+        if self.is_finished() {
             return map;
         }
         let mut stack = vec![(self.clone(), vec![])];

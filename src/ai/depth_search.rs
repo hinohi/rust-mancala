@@ -20,8 +20,9 @@ impl DepthSearchAI {
             sb as i32 - sa as i32
         }
     }
+
     fn search(&self, board: Board, depth: u32) -> i32 {
-        if depth == 0 || board.get_state() != GameState::InBattle {
+        if depth == 0 || board.is_finished() {
             return self.score(&board);
         }
         let mut best = i32::MIN;
