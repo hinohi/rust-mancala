@@ -3,28 +3,32 @@ use std::i32;
 use super::base::AI;
 use crate::game::{Board, Evaluation};
 
-pub struct DepthSearchAI<E> {
-    max_depth: u32,
+pub struct CutDepthAI<E> {
+    max_width: usize,
+    max_depth: usize,
     evaluator: E,
 }
 
-impl<E> DepthSearchAI<E>
+impl<E> CutDepthAI<E>
 where
     E: Evaluation,
 {
-    pub fn new(evaluator: E, max_depth: u32) -> DepthSearchAI<E> {
-        DepthSearchAI {
+    pub fn new(evaluator: E, max_width: usize, max_depth: usize) -> CutDepthAI<E> {
+        CutDepthAI {
+            max_width,
             max_depth,
             evaluator,
         }
     }
 
-    fn search(&self, board: Board, depth: u32) -> i32 {
+    fn search(&self, board: Board, depth: usize) -> i32 {
         if depth == 0 || board.is_finished() {
             return self.evaluator.eval(&board);
         }
         let mut best = i32::MIN;
-        for next in board.list_next() {
+        let mut next_list = board.list_next().drain().collect::<Vec<_>>();
+        next_list.sort_by_key(|board| -self.evaluator.eval(board));
+        for next in next_list.into_iter().take(self.max_width) {
             let s = -self.search(next, depth - 1);
             if s > best {
                 best = s;
@@ -34,7 +38,7 @@ where
     }
 }
 
-impl<E> AI for DepthSearchAI<E>
+impl<E> AI for CutDepthAI<E>
 where
     E: Evaluation,
 {

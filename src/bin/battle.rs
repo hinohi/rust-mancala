@@ -26,6 +26,30 @@ fn ai_factory(s: String) -> Box<AI> {
         } else {
             return Box::new(DepthSearchAI::new(PotEvaluation::new(), depth));
         };
+    } else if s_list[0] == "cut" {
+        if s_list.len() < 4 {
+            eprintln!("Usage: cut:(diff|pot):(width):(depth)");
+            exit(1);
+        }
+        let width = match s_list[2].parse() {
+            Ok(depth) => depth,
+            Err(e) => {
+                eprintln!("parse fail: {}", e);
+                exit(1);
+            }
+        };
+        let depth = match s_list[3].parse() {
+            Ok(depth) => depth,
+            Err(e) => {
+                eprintln!("parse fail: {}", e);
+                exit(1);
+            }
+        };
+        if s_list[1] == "diff" {
+            return Box::new(CutDepthAI::new(ScoreDiffEvaluation::new(), width, depth));
+        } else {
+            return Box::new(CutDepthAI::new(PotEvaluation::new(), width, depth));
+        };
     }
     eprintln!("Usage: {{AI Name}}[:{{Option}}]\ninput: {}", s);
     exit(1);
