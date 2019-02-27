@@ -1,29 +1,27 @@
 use std::i32;
 
-use super::base::*;
-use crate::game::*;
+use super::base::AI;
+use crate::game::{Board, Evaluation};
 
-pub struct DepthSearchAI {
+pub struct DepthSearchAI<E> {
     max_depth: u32,
+    evaluator: E,
 }
 
-impl DepthSearchAI {
-    pub fn new(max_depth: u32) -> DepthSearchAI {
-        DepthSearchAI { max_depth }
-    }
-
-    fn score(&self, board: &Board) -> i32 {
-        let (sa, sb) = board.get_scores();
-        if board.side == 0 {
-            sa as i32 - sb as i32
-        } else {
-            sb as i32 - sa as i32
+impl<E> DepthSearchAI<E>
+where
+    E: Evaluation,
+{
+    pub fn new(evaluator: E, max_depth: u32) -> DepthSearchAI<E> {
+        DepthSearchAI {
+            max_depth,
+            evaluator,
         }
     }
 
     fn search(&self, board: Board, depth: u32) -> i32 {
         if depth == 0 || board.is_finished() {
-            return self.score(&board);
+            return self.evaluator.eval(&board);
         }
         let mut best = i32::MIN;
         for next in board.list_next() {
@@ -36,7 +34,10 @@ impl DepthSearchAI {
     }
 }
 
-impl AI for DepthSearchAI {
+impl<E> AI for DepthSearchAI<E>
+where
+    E: Evaluation,
+{
     fn think(&mut self, board: &Board) -> Vec<usize> {
         let mut best = vec![];
         let mut best_score = i32::MIN;

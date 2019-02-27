@@ -11,14 +11,6 @@ pub struct Board {
     score: [u8; 2],
 }
 
-#[derive(Debug, Eq, PartialEq)]
-pub enum GameState {
-    InBattle,
-    WinA,
-    WinB,
-    Draw,
-}
-
 impl fmt::Display for Board {
     fn fmt(&self, dest: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
@@ -68,25 +60,12 @@ impl Board {
         }
     }
 
-    pub fn get_state(&self) -> GameState {
-        if self.pits[0].iter().sum::<u8>() == 0 || self.pits[1].iter().sum::<u8>() == 0 {
-            if self.score[0] > self.score[1] {
-                return GameState::WinA;
-            } else if self.score[0] < self.score[1] {
-                return GameState::WinB;
-            } else {
-                return GameState::Draw;
-            }
-        }
-        GameState::InBattle
+    pub fn get_scores(&self) -> (u8, u8) {
+        (self.score[0], self.score[1])
     }
 
     pub fn is_finished(&self) -> bool {
         self.pits[0].iter().all(|s| *s == 0) || self.pits[1].iter().all(|s| *s == 0)
-    }
-
-    pub fn get_scores(&self) -> (u8, u8) {
-        (self.score[0], self.score[1])
     }
 
     pub fn get_rest_stone(&self) -> [u8; PIT * 2] {
@@ -135,9 +114,6 @@ impl Board {
     }
 
     pub fn move_one(&mut self, pos: usize) {
-        debug_assert!(pos < PIT);
-        debug_assert!(self.pits[self.side as usize][pos] > 0);
-        debug_assert!(self.get_state() == GameState::InBattle);
         let num = self.pits[self.side as usize][pos];
         self.pits[self.side][pos] = 0;
         let (side, end_pos) = self.move_stone(self.side, pos + 1 as usize, num as usize);
@@ -196,7 +172,7 @@ impl Board {
                 let mut copied_pos = pos_list.clone();
                 copied.move_one(pos);
                 copied_pos.push(pos);
-                if copied.get_state() == GameState::InBattle && copied.side == self.side {
+                if !copied.is_finished() && copied.side == self.side {
                     stack.push((copied, copied_pos));
                 } else {
                     map.entry(copied).or_insert(copied_pos);
@@ -204,5 +180,44 @@ impl Board {
             }
         }
         map
+    }
+}
+
+pub trait Evaluation {
+    fn eval(&self, board: &Board) -> i32;
+}
+
+#[derive(Debug)]
+pub struct ScoreDiffEvaluation;
+
+impl ScoreDiffEvaluation {
+    pub fn new() -> ScoreDiffEvaluation {
+        ScoreDiffEvaluation {}
+    }
+}
+
+impl Evaluation for ScoreDiffEvaluation {
+    fn eval(&self, board: &Board) -> i32 {
+        board.score[board.side] as i32 - board.score[1 - board.side] as i32
+    }
+}
+
+#[derive(Debug)]
+pub struct PotEvaluation;
+
+impl PotEvaluation {
+    pub fn new() -> PotEvaluation {
+        PotEvaluation {}
+    }
+}
+
+impl Evaluation for PotEvaluation {
+    fn eval(&self, board: &Board) -> i32 {
+        let p = board.pits[board.side]
+            .iter()
+            .enumerate()
+            .map(|(i, &s)| if i + s as usize + 1 == PIT { 1 } else { 0 })
+            .sum::<i32>();
+        board.score[board.side] as i32 - board.score[1 - board.side] as i32 + p
     }
 }

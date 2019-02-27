@@ -4,23 +4,15 @@ pub trait AI {
     fn think(&mut self, board: &Board) -> Vec<usize>;
 }
 
-pub struct Judge<A, B>
-where
-    A: AI,
-    B: AI,
-{
+pub struct Judge {
     board: Board,
     turn: u32,
-    ai_a: A,
-    ai_b: B,
+    ai_a: Box<AI>,
+    ai_b: Box<AI>,
 }
 
-impl<A, B> Judge<A, B>
-where
-    A: AI,
-    B: AI,
-{
-    pub fn new(ai_a: A, ai_b: B) -> Judge<A, B> {
+impl Judge {
+    pub fn new(ai_a: Box<AI>, ai_b: Box<AI>) -> Judge {
         Judge {
             board: Board::new(),
             turn: 0,
@@ -29,7 +21,7 @@ where
         }
     }
 
-    fn proceed(&mut self) -> GameState {
+    fn proceed(&mut self) {
         let pos_list;
         if self.board.side == 0 {
             pos_list = self.ai_a.think(&self.board);
@@ -41,20 +33,14 @@ where
             self.board.move_one(pos);
         }
         self.turn += 1;
-        self.board.get_state()
     }
 
-    pub fn run(&mut self) -> (GameState, u8, u8) {
-        if self.board.get_state() != GameState::InBattle {
-            let s = self.board.get_scores();
-            return (self.board.get_state(), s.0, s.1);
-        }
+    pub fn run(&mut self) -> (u8, u8) {
         loop {
-            let state = self.proceed();
-            if state != GameState::InBattle {
-                let s = self.board.get_scores();
-                return (state, s.0, s.1);
+            if self.board.is_finished() {
+                return self.board.get_scores();
             }
+            self.proceed();
         }
     }
 }
