@@ -68,15 +68,8 @@ impl Board {
         self.pits[0].iter().all(|s| *s == 0) || self.pits[1].iter().all(|s| *s == 0)
     }
 
-    pub fn get_rest_stone(&self) -> [u8; PIT * 2] {
-        let mut ret = [0; PIT * 2];
-        for i in 0..PIT {
-            ret[i] = self.pits[self.side as usize][i];
-        }
-        for i in 0..PIT {
-            ret[PIT + i] = self.pits[1 - self.side as usize][i];
-        }
-        ret
+    pub fn get_stone(&self) -> &[[u8; PIT]; 2] {
+        &self.pits
     }
 
     fn move_stone(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
@@ -138,10 +131,9 @@ impl Board {
             return set;
         }
         let mut stack = vec![self.clone()];
-        while !stack.is_empty() {
-            let board = stack.pop().unwrap();
+        while let Some(board) = stack.pop() {
             for pos in 0..PIT {
-                if !board.check_pos(pos).is_ok() {
+                if board.pits[board.side][pos] == 0 {
                     continue;
                 }
                 let mut copied = board.clone();
@@ -162,10 +154,9 @@ impl Board {
             return map;
         }
         let mut stack = vec![(self.clone(), vec![])];
-        while !stack.is_empty() {
-            let (board, pos_list) = stack.pop().unwrap();
+        while let Some((board, pos_list)) = stack.pop() {
             for pos in 0..PIT {
-                if !board.check_pos(pos).is_ok() {
+                if board.pits[board.side][pos] == 0 {
                     continue;
                 }
                 let mut copied = board.clone();
