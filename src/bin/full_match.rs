@@ -1,9 +1,10 @@
 use mancala_rust::*;
+use rand_pcg::Mcg128Xsl64;
 
 fn ai_factory(s: &str) -> Box<AI> {
     let s_list = s.split(':').collect::<Vec<_>>();
     if s_list[0] == "random" {
-        return Box::new(RandomAI::new());
+        return Box::new(RandomAI::new(Mcg128Xsl64::new(1)));
     } else if s_list[0] == "depth" {
         let depth = s_list[2].parse().unwrap();
         if s_list[1] == "diff" {

@@ -2,11 +2,12 @@ use std::env::args;
 use std::process::exit;
 
 use mancala_rust::*;
+use rand_pcg::Mcg128Xsl64;
 
 fn ai_factory(s: String) -> Box<AI> {
     let s_list = s.split(':').collect::<Vec<_>>();
     if s_list[0] == "random" {
-        return Box::new(RandomAI::new());
+        return Box::new(RandomAI::new(Mcg128Xsl64::new(1)));
     } else if s_list[0] == "human" {
         return Box::new(InteractiveAI::new());
     } else if s_list[0] == "depth" {
@@ -38,8 +39,8 @@ fn main() {
         exit(1);
     }
     let deliver = args[1].parse().unwrap();
-    let a = ai_factory(args[1].clone());
-    let b = ai_factory(args[2].clone());
+    let a = ai_factory(args[2].clone());
+    let b = ai_factory(args[3].clone());
     let mut judge = Judge::new(deliver, a, b);
     let (_, a, b) = judge.run();
     println!("{} {}", a, b);
