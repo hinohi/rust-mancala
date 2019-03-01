@@ -26,30 +26,6 @@ fn ai_factory(s: String) -> Box<AI> {
         } else {
             return Box::new(DepthSearchAI::new(PotEvaluation::new(), depth));
         };
-    } else if s_list[0] == "cut" {
-        if s_list.len() < 4 {
-            eprintln!("Usage: cut:(diff|pot):(width):(depth)");
-            exit(1);
-        }
-        let width = match s_list[2].parse() {
-            Ok(depth) => depth,
-            Err(e) => {
-                eprintln!("parse fail: {}", e);
-                exit(1);
-            }
-        };
-        let depth = match s_list[3].parse() {
-            Ok(depth) => depth,
-            Err(e) => {
-                eprintln!("parse fail: {}", e);
-                exit(1);
-            }
-        };
-        if s_list[1] == "diff" {
-            return Box::new(CutDepthAI::new(ScoreDiffEvaluation::new(), width, depth));
-        } else {
-            return Box::new(CutDepthAI::new(PotEvaluation::new(), width, depth));
-        };
     }
     eprintln!("Usage: {{AI Name}}[:{{Option}}]\ninput: {}", s);
     exit(1);
@@ -57,13 +33,14 @@ fn ai_factory(s: String) -> Box<AI> {
 
 fn main() {
     let args = args().collect::<Vec<_>>();
-    if args.len() < 3 {
-        eprintln!("Usage: {} AI AI", args[0]);
+    if args.len() < 4 {
+        eprintln!("Usage: {} DELIVER_NUM AI AI", args[0]);
         exit(1);
     }
+    let deliver = args[1].parse().unwrap();
     let a = ai_factory(args[1].clone());
     let b = ai_factory(args[2].clone());
-    let mut judge = Judge::new(a, b);
-    let (a, b) = judge.run();
+    let mut judge = Judge::new(deliver, a, b);
+    let (_, a, b) = judge.run();
     println!("{} {}", a, b);
 }

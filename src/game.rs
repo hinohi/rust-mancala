@@ -2,12 +2,12 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Write};
 
 pub const PIT: usize = 6;
-pub const STONE: u8 = 4;
+pub const SEED: u8 = 4;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Board {
     pub side: usize,
-    pits: [[u8; PIT]; 2],
+    seeds: [[u8; PIT]; 2],
     score: [u8; 2],
 }
 
@@ -23,7 +23,7 @@ impl fmt::Display for Board {
         write!(
             s,
             "|{}|  |",
-            self.pits[1]
+            self.seeds[1]
                 .iter()
                 .rev()
                 .map(|p| format!("{:2}", *p))
@@ -39,7 +39,7 @@ impl fmt::Display for Board {
         write!(
             s,
             "|{}|",
-            self.pits[0]
+            self.seeds[0]
                 .iter()
                 .map(|p| format!("{:2}", *p))
                 .collect::<Vec<String>>()
@@ -55,7 +55,7 @@ impl Board {
     pub fn new() -> Board {
         Board {
             side: 0,
-            pits: [[STONE; PIT]; 2],
+            seeds: [[SEED; PIT]; 2],
             score: [0, 0],
         }
     }
@@ -65,60 +65,69 @@ impl Board {
     }
 
     pub fn is_finished(&self) -> bool {
-        self.pits[0].iter().all(|s| *s == 0) || self.pits[1].iter().all(|s| *s == 0)
+        self.seeds[0].iter().all(|s| *s == 0) || self.seeds[1].iter().all(|s| *s == 0)
     }
 
-    pub fn get_stone(&self) -> &[[u8; PIT]; 2] {
-        &self.pits
+    pub fn get_seeds(&self) -> &[[u8; PIT]; 2] {
+        &self.seeds
     }
 
-    fn move_stone(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
+    pub fn can_deliver(&self, pos_from: usize, pos_to: usize, num: u8) -> bool {
+        pos_from < PIT && pos_to < PIT && self.seeds[0][pos_from] >= num
+    }
+
+    pub fn deliver(&mut self, pos_from: usize, pos_to: usize, num: u8) {
+        self.seeds[0][pos_from] -= num;
+        self.seeds[0][pos_to] += num;
+    }
+
+    fn move_seed(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
         if pos + num <= PIT {
             for i in pos..pos + num {
-                self.pits[side][i] += 1;
+                self.seeds[side][i] += 1;
             }
             return (side, pos + num - 1);
         }
         for i in pos..PIT {
-            self.pits[side][i] += 1;
+            self.seeds[side][i] += 1;
         }
         if self.side == side {
             self.score[side] += 1;
             if pos + num == PIT + 1 {
                 return (side, PIT);
             }
-            self.move_stone(1 - side, 0, pos + num - PIT - 1)
+            self.move_seed(1 - side, 0, pos + num - PIT - 1)
         } else {
-            self.move_stone(1 - side, 0, pos + num - PIT)
+            self.move_seed(1 - side, 0, pos + num - PIT)
         }
     }
 
-    pub fn check_pos(&self, pos: usize) -> Result<(), String> {
+    pub fn can_sow(&self, pos: usize) -> Result<(), String> {
         if pos >= PIT {
             return Err(format!(
                 "0から{}の間で指定してください",
                 PIT - 1
             ));
         }
-        if self.pits[self.side][pos] == 0 {
+        if self.seeds[self.side][pos] == 0 {
             return Err("そこには石が残っていません".to_string());
         }
         Ok(())
     }
 
-    pub fn move_one(&mut self, pos: usize) {
-        let num = self.pits[self.side as usize][pos];
-        self.pits[self.side][pos] = 0;
-        let (side, end_pos) = self.move_stone(self.side, pos + 1 as usize, num as usize);
+    pub fn sow(&mut self, pos: usize) {
+        let num = self.seeds[self.side as usize][pos];
+        self.seeds[self.side][pos] = 0;
+        let (side, end_pos) = self.move_seed(self.side, pos + 1 as usize, num as usize);
         if side == self.side {
             if end_pos == PIT {
                 if !self.is_finished() {
                     self.side = 1 - self.side;
                 }
-            } else if self.pits[side][end_pos] == 1 {
+            } else if self.seeds[side][end_pos] == 1 {
                 let opposite_pos = PIT - 1 - end_pos;
-                let opposite_num = self.pits[1 - side][opposite_pos];
-                self.pits[1 - side][opposite_pos] = 0;
+                let opposite_num = self.seeds[1 - side][opposite_pos];
+                self.seeds[1 - side][opposite_pos] = 0;
                 self.score[side] += opposite_num;
             }
         }
@@ -133,11 +142,11 @@ impl Board {
         let mut stack = vec![self.clone()];
         while let Some(board) = stack.pop() {
             for pos in 0..PIT {
-                if board.pits[board.side][pos] == 0 {
+                if board.seeds[board.side][pos] == 0 {
                     continue;
                 }
                 let mut copied = board.clone();
-                copied.move_one(pos);
+                copied.sow(pos);
                 if copied.side == self.side {
                     stack.push(copied);
                 } else {
@@ -156,12 +165,12 @@ impl Board {
         let mut stack = vec![(self.clone(), vec![])];
         while let Some((board, pos_list)) = stack.pop() {
             for pos in 0..PIT {
-                if board.pits[board.side][pos] == 0 {
+                if board.seeds[board.side][pos] == 0 {
                     continue;
                 }
                 let mut copied = board.clone();
                 let mut copied_pos = pos_list.clone();
-                copied.move_one(pos);
+                copied.sow(pos);
                 copied_pos.push(pos);
                 if !copied.is_finished() && copied.side == self.side {
                     stack.push((copied, copied_pos));
@@ -204,7 +213,7 @@ impl PotEvaluation {
 
 impl Evaluation for PotEvaluation {
     fn eval(&self, board: &Board) -> i32 {
-        let p = board.pits[board.side]
+        let p = board.seeds[board.side]
             .iter()
             .enumerate()
             .map(|(i, &s)| if i + s as usize == PIT { 1 } else { 0 })

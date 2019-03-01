@@ -11,14 +11,6 @@ fn ai_factory(s: &str) -> Box<AI> {
         } else {
             return Box::new(DepthSearchAI::new(PotEvaluation::new(), depth));
         };
-    } else if s_list[0] == "cut" {
-        let width = s_list[2].parse().unwrap();
-        let depth = s_list[3].parse().unwrap();
-        if s_list[1] == "diff" {
-            return Box::new(CutDepthAI::new(ScoreDiffEvaluation::new(), width, depth));
-        } else {
-            return Box::new(CutDepthAI::new(PotEvaluation::new(), width, depth));
-        };
     }
     unreachable!();
 }
@@ -42,9 +34,14 @@ fn main() {
     loop {
         for &a in list.iter() {
             for &b in list.iter() {
-                let mut j = Judge::new(ai_factory(a), ai_factory(b));
-                let (sa, sb) = j.run();
-                println!("{} {} {} {}", a, b, sa, sb);
+                let mut j = Judge::new(1, ai_factory(a), ai_factory(b));
+                let (board, sa, sb) = j.run();
+                let board = board
+                    .iter()
+                    .map(|s| format!("{}", s))
+                    .collect::<Vec<_>>()
+                    .join(",");
+                println!("{} {} {} {} {}", board, a, b, sa, sb);
             }
         }
     }

@@ -38,7 +38,10 @@ impl<E> AI for DepthSearchAI<E>
 where
     E: Evaluation,
 {
-    fn think(&mut self, board: &Board) -> Vec<usize> {
+    fn deliver(&mut self, _board: &Board) -> (usize, usize, u8) {
+        (0, 0, 0)
+    }
+    fn sow(&mut self, board: &Board) -> Vec<usize> {
         let mut next_lists = board.list_next_with_pos();
         if next_lists.len() == 1 {
             return next_lists.drain().next().unwrap().1;
