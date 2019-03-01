@@ -207,7 +207,7 @@ impl Evaluation for PotEvaluation {
         let p = board.pits[board.side]
             .iter()
             .enumerate()
-            .map(|(i, &s)| if i + s as usize + 1 == PIT { 1 } else { 0 })
+            .map(|(i, &s)| if i + s as usize == PIT { 1 } else { 0 })
             .sum::<i32>();
         board.score[board.side] as i32 - board.score[1 - board.side] as i32 + p
     }
