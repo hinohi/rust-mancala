@@ -23,14 +23,10 @@ fn main() {
         "depth:diff:2",
         "depth:diff:3",
         "depth:diff:4",
-        "depth:diff:5",
-        "depth:diff:6",
         "depth:pot:1",
         "depth:pot:2",
         "depth:pot:3",
         "depth:pot:4",
-        "depth:pot:5",
-        "depth:pot:6",
     ];
     loop {
         for &a in list.iter() {

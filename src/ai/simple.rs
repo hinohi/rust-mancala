@@ -9,12 +9,6 @@ use crate::game::*;
 
 pub struct InteractiveAI;
 
-impl InteractiveAI {
-    pub fn new() -> InteractiveAI {
-        InteractiveAI {}
-    }
-}
-
 fn input<T>(msg: &str) -> Option<T>
 where
     T: FromStr,
@@ -33,9 +27,61 @@ where
     }
 }
 
+fn ab_search<E: Evaluation>(board: Board, eval: &E, depth: usize, alpha: i32, beta: i32) -> i32 {
+    if depth == 0 || board.is_finished() {
+        return eval.eval(&board);
+    }
+    let mut alpha = alpha;
+    for next in board.list_next() {
+        let a = -ab_search(next, eval, depth - 1, -beta, -alpha);
+        if a > alpha {
+            alpha = a;
+        }
+        if alpha >= beta {
+            break;
+        }
+    }
+    alpha
+}
+
+fn get_suggest<E: Evaluation>(board: &Board, eval: &E, max_depth: usize) -> Vec<Option<i32>> {
+    let mut ret = vec![None; PIT];
+    for (next, pos_list) in board.list_next_with_pos() {
+        let s = -ab_search(next, eval, max_depth, -10000, 10000);
+        let pos = pos_list[0];
+        match ret[pos] {
+            None => ret[pos] = Some(s),
+            Some(best) if best < s => ret[pos] = Some(s),
+            _ => (),
+        }
+    }
+    ret
+}
+
+impl InteractiveAI {
+    pub fn new() -> InteractiveAI {
+        InteractiveAI {}
+    }
+
+    fn print_suggest(&self, board: &Board) {
+        let eval = ScoreDiffEvaluation::new();
+        println!("suggest");
+        for max_depth in 1..9 {
+            print!("{} |", max_depth);
+            for best in get_suggest(board, &eval, max_depth) {
+                match best {
+                    Some(best) => print!("{:4}", best),
+                    None => print!("    *"),
+                }
+            }
+            println!("|");
+        }
+    }
+}
+
 impl AI for InteractiveAI {
     fn deliver(&mut self, board: &Board) -> (usize, usize, u8) {
-        writeln!(stderr(), "====\n{}", board).unwrap();
+        writeln!(stderr(), "=========\n{}", board).unwrap();
         loop {
             let pos_from = if let Some(v) = input("deliver from: ") {
                 v
@@ -62,6 +108,7 @@ impl AI for InteractiveAI {
 
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         writeln!(stderr(), "====\n{}", board).unwrap();
+        self.print_suggest(board);
         loop {
             write!(stderr(), "your turn: ").unwrap();
             stderr().flush().unwrap();
