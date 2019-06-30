@@ -11,22 +11,18 @@ fn ai_factory(s: String) -> Box<AI> {
     } else if s_list[0] == "human" {
         return Box::new(InteractiveAI::new());
     } else if s_list[0] == "depth" {
-        if s_list.len() < 3 {
-            eprintln!("Usage: depth:(diff|pot):(depth)");
+        if s_list.len() < 2 {
+            eprintln!("Usage: depth:(depth)");
             exit(1);
         }
-        let depth = match s_list[2].parse() {
+        let depth = match s_list[1].parse() {
             Ok(depth) => depth,
             Err(e) => {
                 eprintln!("parse fail: {}", e);
                 exit(1);
             }
         };
-        if s_list[1] == "diff" {
-            return Box::new(DepthSearchAI::new(ScoreDiffEvaluation::new(), depth));
-        } else {
-            return Box::new(DepthSearchAI::new(PotEvaluation::new(), depth));
-        };
+        return Box::new(DepthSearchAI::new(ScoreDiffEvaluation::new(), depth));
     }
     eprintln!("Usage: {{AI Name}}[:{{Option}}]\ninput: {}", s);
     exit(1);

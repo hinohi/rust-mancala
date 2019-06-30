@@ -7,11 +7,7 @@ fn ai_factory(s: &str) -> Box<AI> {
         return Box::new(RandomAI::new(Mcg128Xsl64::new(1)));
     } else if s_list[0] == "depth" {
         let depth = s_list[2].parse().unwrap();
-        if s_list[1] == "diff" {
-            return Box::new(DepthSearchAI::new(ScoreDiffEvaluation::new(), depth));
-        } else {
-            return Box::new(DepthSearchAI::new(PotEvaluation::new(), depth));
-        };
+        return Box::new(DepthSearchAI::new(ScoreDiffEvaluation::new(), depth));
     }
     unreachable!();
 }
@@ -23,10 +19,6 @@ fn main() {
         "depth:diff:2",
         "depth:diff:3",
         "depth:diff:4",
-        "depth:pot:1",
-        "depth:pot:2",
-        "depth:pot:3",
-        "depth:pot:4",
     ];
     loop {
         for &a in list.iter() {

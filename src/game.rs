@@ -207,23 +207,3 @@ impl Evaluation for ScoreDiffEvaluation {
         }
     }
 }
-
-#[derive(Debug)]
-pub struct PotEvaluation;
-
-impl PotEvaluation {
-    pub fn new() -> PotEvaluation {
-        PotEvaluation {}
-    }
-}
-
-impl Evaluation for PotEvaluation {
-    fn eval(&self, board: &Board) -> i32 {
-        let p = board.seeds[board.side]
-            .iter()
-            .enumerate()
-            .map(|(i, &s)| if i + s as usize == PIT { 1 } else { 0 })
-            .sum::<i32>();
-        board.score[board.side] as i32 - board.score[1 - board.side] as i32 + p
-    }
-}
