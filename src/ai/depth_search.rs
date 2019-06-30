@@ -19,18 +19,21 @@ where
         }
     }
 
-    fn search(&self, board: Board, depth: u32) -> i32 {
+    fn search(&self, board: Board, depth: u32, alpha: i32, beta: i32) -> i32 {
         if depth == 0 || board.is_finished() {
             return self.evaluator.eval(&board);
         }
-        let mut best = i32::MIN;
+        let mut alpha = alpha;
         for next in board.list_next() {
-            let s = -self.search(next, depth - 1);
-            if s > best {
-                best = s;
+            let a = -self.search(next, depth - 1, -beta, -alpha);
+            if a > alpha {
+                alpha = a;
+            }
+            if alpha >= beta {
+                break;
             }
         }
-        best
+        alpha
     }
 }
 
@@ -46,7 +49,7 @@ where
         let mut best = vec![];
         let mut best_score = i32::MIN;
         for (next, pos_list) in next_lists {
-            let s = -self.search(next, self.max_depth);
+            let s = -self.search(next, self.max_depth, -10000, 10000);
             if s > best_score {
                 best_score = s;
                 best = pos_list;
