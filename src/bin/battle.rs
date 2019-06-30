@@ -23,6 +23,19 @@ fn ai_factory(s: String) -> Box<AI> {
             }
         };
         return Box::new(DepthSearchAI::new(ScoreDiffEvaluation::new(), depth));
+    } else if s_list[0] == "mctree" {
+        if s_list.len() < 2 {
+            eprintln!("Usage: mctree:(num)");
+            exit(1);
+        }
+        let path = match s_list[1].parse() {
+            Ok(path) => path,
+            Err(e) => {
+                eprintln!("parse fail: {}", e);
+                exit(1);
+            }
+        };
+        return Box::new(MCTree::new(path, Mcg128Xsl64::new(1)));
     }
     eprintln!("Usage: {{AI Name}}[:{{Option}}]\ninput: {}", s);
     exit(1);
