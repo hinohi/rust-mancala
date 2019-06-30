@@ -125,9 +125,11 @@ impl Board {
             } else if self.seeds[side][end_pos] == 1 {
                 let opposite_pos = PIT - 1 - end_pos;
                 let opposite_num = self.seeds[1 - side][opposite_pos];
-                self.seeds[side][end_pos] = 0;
-                self.seeds[1 - side][opposite_pos] = 0;
-                self.score[side] += opposite_num + 1;
+                if opposite_num > 0 {
+                    self.seeds[side][end_pos] = 0;
+                    self.seeds[1 - side][opposite_pos] = 0;
+                    self.score[side] += opposite_num + 1;
+                }
             }
         }
         self.side = 1 - self.side;
@@ -197,7 +199,12 @@ impl ScoreDiffEvaluation {
 
 impl Evaluation for ScoreDiffEvaluation {
     fn eval(&self, board: &Board) -> i32 {
-        board.score[board.side] as i32 - board.score[1 - board.side] as i32
+        let (s0, s1) = board.last_scores();
+        if board.side == 0 {
+            s0 as i32 - s1 as i32
+        } else {
+            s1 as i32 - s0 as i32
+        }
     }
 }
 
