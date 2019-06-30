@@ -2,27 +2,11 @@ use std::io::{stderr, stdin, Write};
 
 use rand::{seq::SliceRandom, Rng};
 
-use super::base::*;
-use crate::game::*;
+use super::base::AI;
+use super::utils::ab_search;
+use crate::game::{Board, Evaluation, ScoreDiffEvaluation, PIT};
 
 pub struct InteractiveAI;
-
-fn ab_search<E: Evaluation>(board: Board, eval: &E, depth: usize, alpha: i32, beta: i32) -> i32 {
-    if depth == 0 || board.is_finished() {
-        return eval.eval(&board);
-    }
-    let mut alpha = alpha;
-    for next in board.list_next() {
-        let a = -ab_search(next, eval, depth - 1, -beta, -alpha);
-        if a > alpha {
-            alpha = a;
-        }
-        if alpha >= beta {
-            break;
-        }
-    }
-    alpha
-}
 
 fn get_suggest<E: Evaluation>(board: &Board, eval: &E, max_depth: usize) -> Vec<Option<i32>> {
     let mut ret = vec![None; PIT];
