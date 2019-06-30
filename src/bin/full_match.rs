@@ -31,7 +31,7 @@ fn main() {
     loop {
         for &a in list.iter() {
             for &b in list.iter() {
-                let mut j = Judge::new(1, ai_factory(a), ai_factory(b));
+                let mut j = Judge::new(ai_factory(a), ai_factory(b));
                 let (board, sa, sb) = j.run();
                 let board = board
                     .iter()

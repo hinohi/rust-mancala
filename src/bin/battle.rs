@@ -34,14 +34,13 @@ fn ai_factory(s: String) -> Box<AI> {
 
 fn main() {
     let args = args().collect::<Vec<_>>();
-    if args.len() < 4 {
-        eprintln!("Usage: {} DELIVER_NUM AI AI", args[0]);
+    if args.len() < 3 {
+        eprintln!("Usage: {} AI AI", args[0]);
         exit(1);
     }
-    let deliver = args[1].parse().unwrap();
     let a = ai_factory(args[2].clone());
     let b = ai_factory(args[3].clone());
-    let mut judge = Judge::new(deliver, a, b);
+    let mut judge = Judge::new(a, b);
     let (_, a, b) = judge.run();
     println!("{} {}", a, b);
 }

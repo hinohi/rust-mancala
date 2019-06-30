@@ -1,24 +1,21 @@
 use crate::game::*;
 
 pub trait AI {
-    fn deliver(&mut self, board: &Board) -> (usize, usize, u8);
     fn sow(&mut self, board: &Board) -> Vec<usize>;
 }
 
 pub struct Judge {
     board: Board,
     turn: usize,
-    deliver_num: usize,
     ai_a: Box<AI>,
     ai_b: Box<AI>,
 }
 
 impl Judge {
-    pub fn new(deliver_num: usize, ai_a: Box<AI>, ai_b: Box<AI>) -> Judge {
+    pub fn new(ai_a: Box<AI>, ai_b: Box<AI>) -> Judge {
         Judge {
             board: Board::new(),
             turn: 0,
-            deliver_num,
             ai_a,
             ai_b,
         }
@@ -39,11 +36,6 @@ impl Judge {
     }
 
     pub fn run(&mut self) -> ([u8; PIT], u8, u8) {
-        for _ in 0..self.deliver_num {
-            let (pos_from, pos_to, num) = self.ai_b.deliver(&self.board);
-            assert!(self.board.can_deliver(pos_from, pos_to, num));
-            self.board.deliver(pos_from, pos_to, num);
-        }
         let start_board = self.board.get_seeds().clone();
         loop {
             if self.board.is_finished() {

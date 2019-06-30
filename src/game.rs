@@ -72,15 +72,6 @@ impl Board {
         &self.seeds
     }
 
-    pub fn can_deliver(&self, pos_from: usize, pos_to: usize, num: u8) -> bool {
-        pos_from < PIT && pos_to < PIT && self.seeds[0][pos_from] >= num
-    }
-
-    pub fn deliver(&mut self, pos_from: usize, pos_to: usize, num: u8) {
-        self.seeds[0][pos_from] -= num;
-        self.seeds[0][pos_to] += num;
-    }
-
     fn move_seed(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
         if pos + num <= PIT {
             for i in pos..pos + num {

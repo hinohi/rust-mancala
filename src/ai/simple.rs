@@ -80,31 +80,6 @@ impl InteractiveAI {
 }
 
 impl AI for InteractiveAI {
-    fn deliver(&mut self, board: &Board) -> (usize, usize, u8) {
-        writeln!(stderr(), "=========\n{}", board).unwrap();
-        loop {
-            let pos_from = if let Some(v) = input("deliver from: ") {
-                v
-            } else {
-                continue;
-            };
-            let pos_to = if let Some(v) = input("deliver to: ") {
-                v
-            } else {
-                continue;
-            };
-            let num = if let Some(v) = input("deliver num: ") {
-                v
-            } else {
-                continue;
-            };
-            if board.can_deliver(pos_from, pos_to, num) {
-                return (pos_from, pos_to, num);
-            } else {
-                writeln!(stderr(), "不正な移動です").unwrap();
-            }
-        }
-    }
 
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         writeln!(stderr(), "====\n{}", board).unwrap();
@@ -141,16 +116,6 @@ impl<R> AI for RandomAI<R>
 where
     R: Rng,
 {
-    fn deliver(&mut self, board: &Board) -> (usize, usize, u8) {
-        loop {
-            let pos_from = self.random.gen_range(0, PIT);
-            let pos_to = self.random.gen_range(0, PIT);
-            let num = self.random.gen_range(0, SEED);
-            if board.can_deliver(pos_from, pos_to, num) {
-                return (pos_from, pos_to, num);
-            }
-        }
-    }
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         let next_list = board.list_next_with_pos().drain().collect::<Vec<_>>();
         next_list.choose(&mut self.random).unwrap().1.clone()
