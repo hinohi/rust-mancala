@@ -32,13 +32,8 @@ fn main() {
         for &a in list.iter() {
             for &b in list.iter() {
                 let mut j = Judge::new(ai_factory(a), ai_factory(b));
-                let (board, sa, sb) = j.run();
-                let board = board
-                    .iter()
-                    .map(|s| format!("{}", s))
-                    .collect::<Vec<_>>()
-                    .join(",");
-                println!("{} {} {} {} {}", board, a, b, sa, sb);
+                let (sa, sb) = j.run();
+                println!("{} {} {} {}", a, b, sa, sb);
             }
         }
     }

@@ -41,6 +41,6 @@ fn main() {
     let a = ai_factory(args[2].clone());
     let b = ai_factory(args[3].clone());
     let mut judge = Judge::new(a, b);
-    let (_, a, b) = judge.run();
+    let (a, b) = judge.run();
     println!("{} {}", a, b);
 }

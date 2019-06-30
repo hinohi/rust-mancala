@@ -35,12 +35,11 @@ impl Judge {
         self.turn += 1;
     }
 
-    pub fn run(&mut self) -> ([u8; PIT], u8, u8) {
-        let start_board = self.board.get_seeds().clone();
+    pub fn run(&mut self) -> (u8, u8) {
         loop {
             if self.board.is_finished() {
-                let (a, b) = self.board.get_scores();
-                return (start_board[0], a, b);
+                let (a, b) = self.board.last_scores();
+                return (a, b);
             }
             self.proceed();
         }

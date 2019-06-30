@@ -1,6 +1,4 @@
-use std::fmt::Display;
 use std::io::{stderr, stdin, Write};
-use std::str::FromStr;
 
 use rand::{seq::SliceRandom, Rng};
 
@@ -8,24 +6,6 @@ use super::base::*;
 use crate::game::*;
 
 pub struct InteractiveAI;
-
-fn input<T>(msg: &str) -> Option<T>
-where
-    T: FromStr,
-    <T as std::str::FromStr>::Err: Display,
-{
-    write!(stderr(), "{}", msg).unwrap();
-    stderr().flush().unwrap();
-    let mut buf = String::new();
-    stdin().read_line(&mut buf).unwrap();
-    match buf.trim().parse() {
-        Ok(v) => Some(v),
-        Err(e) => {
-            write!(stderr(), "{}\n", e).unwrap();
-            None
-        }
-    }
-}
 
 fn ab_search<E: Evaluation>(board: Board, eval: &E, depth: usize, alpha: i32, beta: i32) -> i32 {
     if depth == 0 || board.is_finished() {
@@ -80,7 +60,6 @@ impl InteractiveAI {
 }
 
 impl AI for InteractiveAI {
-
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         writeln!(stderr(), "====\n{}", board).unwrap();
         self.print_suggest(board);

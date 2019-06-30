@@ -60,6 +60,13 @@ impl Board {
         }
     }
 
+    pub fn last_scores(&self) -> (u8, u8) {
+        (
+            self.score[0] + self.seeds[0].iter().sum::<u8>(),
+            self.score[1] + self.seeds[1].iter().sum::<u8>(),
+        )
+    }
+
     pub fn get_scores(&self) -> (u8, u8) {
         (self.score[0], self.score[1])
     }
