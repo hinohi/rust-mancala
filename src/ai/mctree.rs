@@ -115,7 +115,7 @@ where
         }
         let e = crate::game::ScoreDiffEvaluation::new();
         let flip = flip_score(&board);
-        let s = super::utils::ab_search(board, &e, 10000, -10000, 10000) * flip;
+        let s = super::utils::ab_search(board, &e, 9, -10000, 10000) * flip;
         s
     }
 }

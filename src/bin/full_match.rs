@@ -16,8 +16,8 @@ fn ai_factory(s: &str) -> Box<AI> {
         let path = 1 << s_list[1].parse::<i32>().unwrap();
         let full = s_list[2].parse::<u8>().unwrap();
         return Box::new(MCTreeLF::new(
-            dbg!(path as usize),
-            dbg!(full),
+            path as usize,
+            full,
             Mcg128Xsl64::from_entropy(),
         ));
     }
@@ -25,7 +25,20 @@ fn ai_factory(s: &str) -> Box<AI> {
 }
 
 fn main() {
-    let list = ["random", "mctree:10", "mctree_lf:4:10"];
+    let list = [
+        "random",
+        "depth:diff:3",
+        "depth:diff:7",
+        "mctree:10",
+        "mctree:12",
+        "mctree_lf:8:5",
+        "mctree_lf:8:6",
+        "mctree_lf:8:7",
+        "mctree_lf:8:8",
+        "mctree_lf:8:9",
+        "mctree_lf:10:5",
+        "mctree_lf:10:6",
+    ];
     loop {
         for &a in list.iter() {
             for &b in list.iter() {
