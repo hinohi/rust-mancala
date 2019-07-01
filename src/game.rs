@@ -7,6 +7,7 @@ pub const SEED: u8 = 4;
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Board {
     pub side: usize,
+    stealing: bool,
     seeds: [[u8; PIT]; 2],
     score: [u8; 2],
 }
@@ -52,9 +53,10 @@ impl fmt::Display for Board {
 }
 
 impl Board {
-    pub fn new() -> Board {
+    pub fn new(stealing: bool) -> Board {
         Board {
             side: 0,
+            stealing,
             seeds: [[SEED; PIT]; 2],
             score: [0, 0],
         }
@@ -122,7 +124,7 @@ impl Board {
                 if !self.is_finished() {
                     self.side = 1 - self.side;
                 }
-            } else if self.seeds[side][end_pos] == 1 {
+            } else if self.stealing && self.seeds[side][end_pos] == 1 {
                 let opposite_pos = PIT - 1 - end_pos;
                 let opposite_num = self.seeds[1 - side][opposite_pos];
                 if opposite_num > 0 {

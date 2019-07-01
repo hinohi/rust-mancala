@@ -12,9 +12,9 @@ pub struct Judge {
 }
 
 impl Judge {
-    pub fn new(ai_a: Box<AI>, ai_b: Box<AI>) -> Judge {
+    pub fn new(stealing: bool, ai_a: Box<AI>, ai_b: Box<AI>) -> Judge {
         Judge {
-            board: Board::new(),
+            board: Board::new(stealing),
             turn: 0,
             ai_a,
             ai_b,

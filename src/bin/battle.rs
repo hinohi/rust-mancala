@@ -43,13 +43,20 @@ fn ai_factory(s: String) -> Box<AI> {
 
 fn main() {
     let args = args().collect::<Vec<_>>();
-    if args.len() < 3 {
-        eprintln!("Usage: {} AI AI", args[0]);
+    if args.len() < 4 {
+        eprintln!("Usage: {} STEAL AI AI", args[0]);
         exit(1);
     }
-    let a = ai_factory(args[1].clone());
-    let b = ai_factory(args[2].clone());
-    let mut judge = Judge::new(a, b);
+    let stealing = match args[1].parse() {
+        Ok(b) => b,
+        Err(e) => {
+            eprintln!("{}", e);
+            exit(1);
+        }
+    };
+    let a = ai_factory(args[2].clone());
+    let b = ai_factory(args[3].clone());
+    let mut judge = Judge::new(stealing, a, b);
     let (a, b) = judge.run();
     println!("{} {}", a, b);
 }
