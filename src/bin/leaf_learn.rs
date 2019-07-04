@@ -15,13 +15,14 @@ fn main() -> io::Result<()> {
         Err(_) => {
             eprintln!("no db file: {}", name);
         }
-        Ok(mut f) => {
+        Ok(f) => {
             eprintln!("restore db file: {}", name);
+            let mut f = io::BufReader::new(f);
             leaner.restore(&mut f)?;
         }
     }
     leaner.learn(1000000);
-    let mut f = File::create(&name)?;
+    let mut f = io::BufWriter::new(File::create(&name)?);
     leaner.dump(&mut f)?;
     Ok(())
 }

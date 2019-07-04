@@ -98,13 +98,20 @@ where
 
     pub fn learn(&mut self, num: usize) {
         let board = Board::new(self.stealing);
-        for _ in 0..num {
+        for i in 0..num {
             self.search1(&board, 0);
+            if i % (num / 100) == 0 {
+                println!("{} / {}", i, num);
+            }
         }
         println!("{}", self.db.len());
     }
 
     fn search1(&mut self, board: &Board, depth: isize) -> isize {
+        let key = board_key(board);
+        if self.db.contains_key(&key) {
+            return depth - 1;
+        }
         let mut next_list = board.list_next().drain().collect::<Vec<_>>();
         if next_list.is_empty() {
             return depth - self.back_depth;
