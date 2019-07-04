@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use rand::Rng;
+
 use crate::game::{Board, PIT};
 
 type Key = [u8; PIT * 2];
@@ -34,39 +36,47 @@ fn board_last_score(board: &Board) -> i32 {
 }
 
 #[derive(Clone)]
-pub struct Learner {
-    start_depth: usize,
+pub struct Learner<R> {
+    random: R,
+    stealing: bool,
+    back_depth: isize,
     db: HashMap<Key, i32>,
 }
 
-impl Learner {
-    pub fn new(start_depth: usize) -> Learner {
+impl<R> Learner<R>
+where
+    R: Rng,
+{
+    pub fn new(random: R, stealing: bool, back_depth: isize) -> Learner<R> {
         Learner {
-            start_depth,
+            random,
+            stealing,
+            back_depth,
             db: HashMap::new(),
         }
     }
 
-    pub fn learn(&mut self, stealing: bool) {
-        let board = Board::new(stealing);
-        self.search1(&board, 0);
+    pub fn learn(&mut self, num: usize) {
+        let board = Board::new(self.stealing);
+        for _ in 0..num {
+            self.search1(&board, 0);
+        }
         println!("{}", self.db.len());
     }
 
-    fn search1(&mut self, board: &Board, depth: usize) {
-        if board.is_finished() {
-            return;
+    fn search1(&mut self, board: &Board, depth: isize) -> isize {
+        let mut next_list = board.list_next().drain().collect::<Vec<_>>();
+        if next_list.is_empty() {
+            return depth - self.back_depth;
         }
-        if depth >= self.start_depth {
-            self.search2(board);
-            return;
+        let idx = self.random.gen_range(0, next_list.len());
+        let nex = next_list.swap_remove(idx);
+        let back = self.search1(&nex, depth + 1);
+        if back == depth {
+            let s = self.search2(board);
+            println!("{}\n{}", board, s);
         }
-        for nex in board.list_next() {
-            self.search1(&nex, depth + 1);
-        }
-        if depth == 2 {
-            println!("{}", board);
-        }
+        back
     }
 
     fn search2(&mut self, board: &Board) -> i32 {
