@@ -9,7 +9,7 @@ use crate::game::{Board, PIT, SEED};
 type Key = [u8; PIT * 2];
 
 fn board_key(board: &Board) -> Key {
-    let seeds = board.get_seeds();
+    let seeds = board.seeds();
     let mut key = [0; PIT * 2];
     for (i, s) in seeds[board.side].iter().enumerate() {
         key[i] = *s;
@@ -21,7 +21,7 @@ fn board_key(board: &Board) -> Key {
 }
 
 fn board_score(board: &Board) -> i8 {
-    let (s0, s1) = board.get_scores();
+    let (s0, s1) = board.scores();
     if board.side == 0 {
         s0 as i8 - s1 as i8
     } else {

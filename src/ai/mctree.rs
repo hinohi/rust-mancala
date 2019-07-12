@@ -97,7 +97,7 @@ where
 
     #[inline]
     fn is_random(&self, board: &Board) -> bool {
-        let seeds = board.get_seeds();
+        let seeds = board.seeds();
         let s0 = seeds[0].iter().sum::<u8>();
         let s1 = seeds[1].iter().sum::<u8>();
         s0 + s1 > self.full_num
