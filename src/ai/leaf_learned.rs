@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::io::{self, Read};
 
+use fnv::FnvHashMap;
 use rand::Rng;
 
 use super::base::AI;
@@ -158,14 +159,14 @@ where
 }
 
 lazy_static! {
-    static ref DB: HashMap<[u8; PIT], i8> = read_db(true);
+    static ref DB: FnvHashMap<Key, i8> = read_db(true);
 }
 
-fn read_db(stealing: bool) -> HashMap<[u8; PIT], i8> {
+fn read_db(stealing: bool) -> FnvHashMap<Key, i8> {
     let name = format!("p{}s{}_{}.db", PIT, SEED, stealing);
     let mut f = match std::fs::File::open(name) {
         Ok(f) => io::BufReader::new(f),
-        Err(_) => return HashMap::new(),
+        Err(_) => return FnvHashMap::default(),
     };
     let n = {
         let mut n: u64 = 0;
@@ -176,35 +177,27 @@ fn read_db(stealing: bool) -> HashMap<[u8; PIT], i8> {
         }
         n as usize / 4
     };
-    let mut ret = HashMap::with_capacity(n);
+    let mut ret = FnvHashMap::with_capacity_and_hasher(n, Default::default());
     let mut buf = [0; PIT * 2 + 1];
     for _ in 0..n {
         match f.read_exact(&mut buf) {
             Err(_) => return ret,
             Ok(_) => (),
         }
-        let mut key = [0; PIT];
+        let mut key = [0; PIT * 2];
         for (pos, &s) in buf[..PIT].iter().enumerate() {
             key[pos] = s;
         }
         for (pos, &s) in buf[PIT..PIT * 2].iter().enumerate() {
-            key[pos] ^= s.rotate_left(4);
+            key[PIT + pos] = s;
         }
         ret.insert(key, buf[PIT * 2] as i8);
     }
     ret
 }
 
-fn db_key(board: &Board) -> [u8; PIT] {
-    let seeds = board.get_seeds();
-    let mut key = [0; PIT];
-    for (pos, &s) in seeds[board.side].iter().enumerate() {
-        key[pos] = s;
-    }
-    for (pos, &s) in seeds[1 - board.side].iter().enumerate() {
-        key[pos] ^= s.rotate_left(4);
-    }
-    key
+fn db_key(board: &Board) -> Key {
+    board_key(board)
 }
 
 pub struct LearnedMCTree<R: Rng> {
