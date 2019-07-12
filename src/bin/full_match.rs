@@ -44,7 +44,7 @@ fn main() {
     loop {
         for &a in list.iter() {
             for &b in list.iter() {
-                let mut j = Judge::new(false, ai_factory(a), ai_factory(b));
+                let mut j = Game::new(false, ai_factory(a), ai_factory(b));
                 let (sa, sb) = j.run();
                 println!("{} {} {} {}", a, b, sa, sb);
             }

@@ -1,8 +1,8 @@
 use std::i32;
 
-use super::base::AI;
 use super::utils::ab_search;
-use crate::game::{Board, Evaluation};
+use super::AI;
+use crate::board::{Board, Evaluation};
 
 pub struct DepthSearchAI<E> {
     max_depth: usize,

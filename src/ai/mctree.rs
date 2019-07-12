@@ -1,7 +1,7 @@
 use rand::Rng;
 
-use super::base::AI;
-use crate::game::Board;
+use super::AI;
+use crate::board::Board;
 
 #[inline]
 fn flip_score(board: &Board) -> i32 {
@@ -113,7 +113,7 @@ where
             let idx = self.random.gen_range(0, next_list.len());
             board = next_list.swap_remove(idx);
         }
-        let e = crate::game::ScoreDiffEvaluation::new();
+        let e = crate::board::ScoreDiffEvaluation::new();
         let flip = flip_score(&board);
         let s = super::utils::ab_search(board, &e, 9, -10000, 10000) * flip;
         s

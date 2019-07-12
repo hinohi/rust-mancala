@@ -3,8 +3,8 @@ use std::io::{self, Read};
 use fnv::FnvHashMap;
 use rand::Rng;
 
-use super::base::AI;
-use crate::game::{Board, PIT, SEED};
+use super::AI;
+use crate::board::{Board, PIT, SEED};
 
 type Key = [u8; PIT * 2];
 

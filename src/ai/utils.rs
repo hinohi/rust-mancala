@@ -1,4 +1,4 @@
-use crate::game::{Board, Evaluation};
+use crate::board::{Board, Evaluation};
 
 pub fn ab_search<E: Evaluation>(
     board: Board,

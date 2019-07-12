@@ -2,9 +2,9 @@ use std::io::stdin;
 
 use rand::{seq::SliceRandom, Rng};
 
-use super::base::AI;
 use super::utils::ab_search;
-use crate::game::{Board, Evaluation, ScoreDiffEvaluation, PIT};
+use super::AI;
+use crate::board::{Board, Evaluation, ScoreDiffEvaluation, PIT};
 
 pub struct InteractiveAI;
 
