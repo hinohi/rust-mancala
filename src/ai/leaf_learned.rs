@@ -201,7 +201,7 @@ fn db_key(board: &Board) -> [u8; PIT] {
     for (pos, &s) in seeds[board.side].iter().enumerate() {
         key[pos] = s;
     }
-    for (pos, &s) in seeds[board.side].iter().enumerate() {
+    for (pos, &s) in seeds[1 - board.side].iter().enumerate() {
         key[pos] ^= s.rotate_left(4);
     }
     key
@@ -210,6 +210,7 @@ fn db_key(board: &Board) -> [u8; PIT] {
 pub struct LearnedMCTree<R: Rng> {
     path_num: usize,
     random: R,
+    hit: u64,
 }
 
 impl<R> LearnedMCTree<R>
@@ -217,7 +218,11 @@ where
     R: Rng,
 {
     pub fn new(path_num: usize, random: R) -> LearnedMCTree<R> {
-        LearnedMCTree { path_num, random }
+        LearnedMCTree {
+            path_num,
+            random,
+            hit: 0,
+        }
     }
 
     fn random_down(&mut self, board: Board) -> (i8, usize) {
@@ -225,6 +230,7 @@ where
         loop {
             let key = db_key(&board);
             if let Some(score) = DB.get(&key) {
+                self.hit += 1;
                 return (*score + board_score(&board), board.side);
             }
             let mut next_list = board.list_next().drain().collect::<Vec<_>>();
@@ -243,11 +249,13 @@ where
     R: Rng,
 {
     fn sow(&mut self, board: &Board) -> Vec<usize> {
+        self.hit = 0;
         let mut next_lists = board.list_next_with_pos();
-        if next_lists.len() == 1 {
+        let n = next_lists.len();
+        if n == 1 {
             return next_lists.drain().next().unwrap().1;
         }
-        let per_con = (self.path_num + next_lists.len() - 1) / next_lists.len();
+        let per_con = (self.path_num + n - 1) / n;
         let mut best = (0, 0, std::i8::MIN);
         let mut best_pos = vec![];
         for (board, pos) in next_lists {
@@ -269,6 +277,7 @@ where
                 best_pos = pos;
             }
         }
+        println!("{} / {}", self.hit, per_con * n);
         best_pos
     }
 }

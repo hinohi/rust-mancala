@@ -90,6 +90,7 @@ fn main() {
     let a = ai_factory(args[2].clone());
     let b = ai_factory(args[3].clone());
     let mut judge = Judge::new(stealing, a, b);
+    judge.show_board(true);
     let (a, b) = judge.run();
     println!("{} {}", a, b);
 }
