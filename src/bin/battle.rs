@@ -71,8 +71,8 @@ fn main() {
     };
     let a = ai_factory(args[2].clone());
     let b = ai_factory(args[3].clone());
-    let mut judge = Game::new(stealing, a, b);
-    judge.show_board(true);
-    let (a, b) = judge.run();
+    let mut game = Game::new(stealing, a, b);
+    game.show_board(true);
+    let (a, b) = game.run();
     println!("{} {}", a, b);
 }
