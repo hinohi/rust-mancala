@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::io::{self, Read};
 
 use fnv::FnvHashMap;
@@ -44,7 +43,7 @@ pub struct Learner<R> {
     random: R,
     stealing: bool,
     back_depth: isize,
-    db: HashMap<Key, i8>,
+    db: FnvHashMap<Key, i8>,
 }
 
 impl<R> Learner<R>
@@ -56,21 +55,13 @@ where
             random,
             stealing,
             back_depth,
-            db: HashMap::new(),
+            db: FnvHashMap::default(),
         }
     }
 
     pub fn dump<W: io::Write>(&self, writer: &mut W) -> io::Result<()> {
         let n = self.db.len() as u64;
-        {
-            let mut n = n;
-            let mut buf = [0; 8];
-            for i in 0..8 {
-                buf[i] = (n & 0xFF) as u8;
-                n >>= 8;
-            }
-            writer.write_all(&buf)?;
-        };
+        writer.write_all(&n.to_le_bytes())?;
         for (key, value) in self.db.iter() {
             writer.write_all(key)?;
             writer.write_all(&[*value as u8])?;
@@ -80,15 +71,11 @@ where
 
     pub fn restore<Re: io::Read>(&mut self, reader: &mut Re) -> io::Result<()> {
         let n = {
-            let mut n: u64 = 0;
             let mut buf = [0; 8];
             reader.read_exact(&mut buf)?;
-            for i in 0..8 {
-                n += (buf[i] as u64) << (i as u64 * 8);
-            }
-            n as usize
+            u64::from_le_bytes(buf) as usize
         };
-        self.db = HashMap::with_capacity(n);
+        self.db = FnvHashMap::with_capacity_and_hasher(n, Default::default());
         for _ in 0..n {
             let mut key = [0; PIT * 2];
             reader.read_exact(&mut key)?;

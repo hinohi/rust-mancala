@@ -7,7 +7,7 @@ use rand_pcg::Mcg128Xsl64;
 use mancala_rust::*;
 
 fn main() -> io::Result<()> {
-    let stealing = true;
+    let stealing = false;
     let name = format!("p{}s{}_{}.db", PIT, SEED, stealing);
 
     let mut leaner = Learner::new(Mcg128Xsl64::from_entropy(), stealing, 4);
@@ -21,7 +21,7 @@ fn main() -> io::Result<()> {
             leaner.restore(&mut f)?;
         }
     }
-    leaner.learn(1000000);
+    leaner.learn(100);
     let mut f = io::BufWriter::new(File::create(&name)?);
     leaner.dump(&mut f)?;
     Ok(())
