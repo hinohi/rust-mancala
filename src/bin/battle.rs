@@ -68,7 +68,9 @@ fn ai_factory(s: String) -> Box<AI> {
                 exit(1);
             }
         };
-        return Box::new(LearnedMCTree::new(path, Mcg128Xsl64::new(1)));
+        let mut ai = LearnedMCTree::new(path, Mcg128Xsl64::new(1));
+        ai.show_hit(true);
+        return Box::new(ai);
     }
     eprintln!("Usage: {{AI Name}}[:{{Option}}]\ninput: {}", s);
     exit(1);

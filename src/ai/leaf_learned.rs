@@ -204,6 +204,7 @@ pub struct LearnedMCTree<R: Rng> {
     path_num: usize,
     random: R,
     hit: u64,
+    show_hit: bool,
 }
 
 impl<R> LearnedMCTree<R>
@@ -215,7 +216,12 @@ where
             path_num,
             random,
             hit: 0,
+            show_hit: false,
         }
+    }
+
+    pub fn show_hit(&mut self, show: bool) {
+        self.show_hit = show;
     }
 
     fn random_down(&mut self, board: Board) -> (i8, usize) {
@@ -270,7 +276,9 @@ where
                 best_pos = pos;
             }
         }
-        println!("{} / {}", self.hit, per_con * n);
+        if self.show_hit {
+            println!("{} / {}", self.hit, per_con * n);
+        }
         best_pos
     }
 }
