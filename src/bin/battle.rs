@@ -36,26 +36,6 @@ fn ai_factory(s: String) -> Box<AI> {
             }
         };
         return Box::new(MCTree::new(path, Mcg128Xsl64::new(1)));
-    } else if s_list[0] == "mctree_lf" {
-        if s_list.len() < 3 {
-            eprintln!("Usage: mctree_lf:(path):(full)");
-            exit(1);
-        }
-        let path = match s_list[1].parse() {
-            Ok(path) => path,
-            Err(e) => {
-                eprintln!("parse fail: {}", e);
-                exit(1);
-            }
-        };
-        let full = match s_list[2].parse() {
-            Ok(full) => full,
-            Err(e) => {
-                eprintln!("parse fail: {}", e);
-                exit(1);
-            }
-        };
-        return Box::new(MCTreeLF::new(path, full, Mcg128Xsl64::new(1)));
     } else if s_list[0] == "learned" {
         if s_list.len() < 2 {
             eprintln!("Usage: learned:(path)");

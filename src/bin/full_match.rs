@@ -12,14 +12,6 @@ fn ai_factory(s: &str) -> Box<AI> {
     } else if s_list[0] == "mctree" {
         let path = 1 << s_list[1].parse::<i32>().unwrap();
         return Box::new(MCTree::new(path as usize, Mcg128Xsl64::from_entropy()));
-    } else if s_list[0] == "mctree_lf" {
-        let path = 1 << s_list[1].parse::<i32>().unwrap();
-        let full = s_list[2].parse::<u8>().unwrap();
-        return Box::new(MCTreeLF::new(
-            path as usize,
-            full,
-            Mcg128Xsl64::from_entropy(),
-        ));
     } else if s_list[0] == "learned" {
         let path = 1 << s_list[1].parse::<i32>().unwrap();
         return Box::new(LearnedMCTree::new(
