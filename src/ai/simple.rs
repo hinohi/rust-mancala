@@ -1,4 +1,4 @@
-use std::io::{stderr, stdin, Write};
+use std::io::stdin;
 
 use rand::{seq::SliceRandom, Rng};
 
@@ -29,27 +29,25 @@ impl InteractiveAI {
 
     fn print_suggest(&self, board: &Board) {
         let eval = ScoreDiffEvaluation::new();
-        println!("suggest");
+        eprintln!("suggest");
         for max_depth in 1..9 {
-            print!("{} |", max_depth);
+            eprint!("{} |", max_depth);
             for best in get_suggest(board, &eval, max_depth) {
                 match best {
-                    Some(best) => print!("{:4}", best),
-                    None => print!("    *"),
+                    Some(best) => eprint!("{:4}", best),
+                    None => eprint!("    *"),
                 }
             }
-            println!("|");
+            eprintln!("|");
         }
     }
 }
 
 impl AI for InteractiveAI {
     fn sow(&mut self, board: &Board) -> Vec<usize> {
-        writeln!(stderr(), "====\n{}", board).unwrap();
         self.print_suggest(board);
         loop {
-            write!(stderr(), "your turn: ").unwrap();
-            stderr().flush().unwrap();
+            eprint!("your turn: ");
             let mut buf = String::new();
             stdin().read_line(&mut buf).unwrap();
             match buf.trim().parse() {
@@ -57,9 +55,9 @@ impl AI for InteractiveAI {
                     Ok(_) => {
                         return vec![i];
                     }
-                    Err(e) => write!(stderr(), "{}\n", e).unwrap(),
+                    Err(e) => eprintln!("{}", e),
                 },
-                Err(e) => write!(stderr(), "{}\n", e).unwrap(),
+                Err(e) => eprintln!("{}", e),
             }
         }
     }
