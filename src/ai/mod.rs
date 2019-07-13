@@ -49,17 +49,33 @@ pub fn build_ai(s: &str) -> Result<Box<AI>, String> {
             Ok(Box::new(RandomAI::new(Rng::from_entropy())))
         }
         "dfs" => {
-            if args.len() != 2 {
-                return Err("dfs:(max_depth)".to_string());
+            if args.len() != 3 {
+                return Err("dfs:(eval):(max_depth)".to_string());
             }
-            let max_depth = match args[1].parse() {
+            let max_depth = match args[2].parse() {
                 Ok(d) => d,
-                Err(e) => return Err(format!("dfs:(max_depth) {}", e)),
+                Err(e) => return Err(format!("dfs:(eval):(max_depth) {}", e)),
             };
-            Ok(Box::new(DepthSearchAI::new(
-                ScoreDiffEvaluator::new(),
-                max_depth,
-            )))
+            let eval_args = args[1].split('-').collect::<Vec<_>>();
+            Ok(match eval_args[0] {
+                "diff" => Box::new(DepthSearchAI::new(ScoreDiffEvaluator::new(), max_depth)),
+                "mc" => {
+                    if eval_args.len() != 2 {
+                        return Err("dfs:mc-(num):(max_depth)".to_string());
+                    }
+                    let num = match eval_args[1].parse() {
+                        Ok(d) => d,
+                        Err(e) => return Err(format!("dfs:mc-(num):(max_depth) {}", e)),
+                    };
+                    Box::new(DepthSearchAI::new(
+                        MCTreeEvaluator::new(Rng::from_entropy(), num),
+                        max_depth,
+                    ))
+                }
+                _ => {
+                    return Err("dfs:(diff|mc-(num)):(max_depth)".to_string());
+                }
+            })
         }
         "mctree" => {
             if args.len() != 2 {
