@@ -111,18 +111,22 @@ impl Score for WinRateScore {
 }
 
 #[derive(Debug)]
-pub struct MCTreeEvaluator<'a, R> {
-    random: &'a mut R,
+pub struct MCTreeEvaluator<R> {
+    random: R,
     num: usize,
 }
 
-impl<'a, R> MCTreeEvaluator<'a, R> {
-    pub fn new(random: &'a mut R, num: usize) -> Self {
+impl<R> MCTreeEvaluator<R> {
+    pub fn new(random: R, num: usize) -> Self {
         MCTreeEvaluator { random, num }
+    }
+
+    pub fn set_num(&mut self, num: usize) {
+        self.num = num;
     }
 }
 
-impl<'a, R: Rng> Evaluator for MCTreeEvaluator<'a, R> {
+impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
     type Score = WinRateScore;
     fn eval(&mut self, board: &Board) -> Self::Score {
         let mut score = Self::Score::default();

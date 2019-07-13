@@ -7,7 +7,7 @@ use crate::board::Board;
 #[derive(Debug)]
 pub struct MCTree<R: Rng> {
     path_num: usize,
-    random: R,
+    evaluator: MCTreeEvaluator<R>,
 }
 
 impl<R> MCTree<R>
@@ -15,7 +15,10 @@ where
     R: Rng,
 {
     pub fn new(path_num: usize, random: R) -> MCTree<R> {
-        MCTree { path_num, random }
+        MCTree {
+            path_num,
+            evaluator: MCTreeEvaluator::new(random, 0),
+        }
     }
 }
 
@@ -29,12 +32,12 @@ where
         if n == 1 {
             return next_lists.drain().next().unwrap().1;
         }
-        let mut eval = MCTreeEvaluator::new(&mut self.random, (self.path_num + n - 1) / n);
+        self.evaluator.set_num((self.path_num + n - 1) / n);
         // `MCTreeEvaluator::Score::MIN` だと `ambiguous associated type` と怒られる
         let mut best = WinRateScore::MIN;
         let mut best_pos = vec![];
         for (board, pos) in next_lists {
-            let score = eval.eval(&board).flip();
+            let score = self.evaluator.eval(&board).flip();
             if best < score {
                 best = score;
                 best_pos = pos;
