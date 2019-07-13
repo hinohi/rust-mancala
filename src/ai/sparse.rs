@@ -81,9 +81,9 @@ where
         if next_list.is_empty() {
             let (s0, s1) = board.last_scores();
             return if board.side == 0 {
-                s0 as i32 - s1 as i32
+                i32::from(s0) - i32::from(s1)
             } else {
-                s1 as i32 - s0 as i32
+                i32::from(s1) - i32::from(s0)
             };
         }
         let mut best = std::i32::MIN;

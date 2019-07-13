@@ -39,9 +39,9 @@ where
             for _ in 0..per_con {
                 let (s0, s1) = random_down(&mut self.random, board.clone()).last_scores();
                 let score = if side == 0 {
-                    s0 as i32 - s1 as i32
+                    i32::from(s0) - i32::from(s1)
                 } else {
-                    s1 as i32 - s0 as i32
+                    i32::from(s1) - i32::from(s0)
                 };
                 if score > 0 {
                     win += 1;

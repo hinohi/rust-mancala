@@ -159,17 +159,16 @@ fn read_db(stealing: bool) -> FnvHashMap<Key, i8> {
         let mut n: u64 = 0;
         let mut buf = [0; 8];
         f.read_exact(&mut buf).unwrap();
-        for i in 0..8 {
-            n += (buf[i] as u64) << (i as u64 * 8);
+        for (i, b) in buf.iter().enumerate() {
+            n += (u64::from(*b)) << (i as u64 * 8);
         }
         n as usize / 4
     };
     let mut ret = FnvHashMap::with_capacity_and_hasher(n, Default::default());
     let mut buf = [0; PIT * 2 + 1];
     for _ in 0..n {
-        match f.read_exact(&mut buf) {
-            Err(_) => return ret,
-            Ok(_) => (),
+        if f.read_exact(&mut buf).is_err() {
+            return ret;
         }
         let mut key = [0; PIT * 2];
         for (pos, &s) in buf[..PIT].iter().enumerate() {

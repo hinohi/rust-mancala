@@ -25,12 +25,11 @@ impl Game {
     }
 
     fn proceed(&mut self) {
-        let pos_list;
-        if self.board.side == 0 {
-            pos_list = self.ai_a.sow(&self.board);
+        let pos_list = if self.board.side == 0 {
+            self.ai_a.sow(&self.board)
         } else {
-            pos_list = self.ai_b.sow(&self.board);
-        }
+            self.ai_b.sow(&self.board)
+        };
         for &pos in pos_list.iter() {
             assert!(self.board.can_sow(pos).is_ok());
             self.board.sow(pos);

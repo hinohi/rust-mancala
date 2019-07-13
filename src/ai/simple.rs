@@ -5,6 +5,7 @@ use rand::{seq::SliceRandom, Rng};
 use super::{evaluator::ScoreDiffEvaluator, utils::ab_search, Evaluator, AI};
 use crate::board::{Board, PIT};
 
+#[derive(Debug, Default)]
 pub struct InteractiveAI;
 
 fn get_suggest<E: Evaluator>(board: &Board, eval: &E, max_depth: usize) -> Vec<Option<i32>> {
