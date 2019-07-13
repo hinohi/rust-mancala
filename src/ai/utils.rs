@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use super::Evaluator;
 use crate::board::Board;
 
@@ -16,4 +18,17 @@ pub fn ab_search<E: Evaluator>(board: Board, eval: &E, depth: usize, alpha: i32,
         }
     }
     alpha
+}
+
+pub fn random_down<R: Rng>(random: &mut R, board: Board) -> Board {
+    let mut board = board;
+    loop {
+        let mut next_list = board.list_next().drain().collect::<Vec<_>>();
+        if next_list.is_empty() {
+            break;
+        }
+        let idx = random.gen_range(0, next_list.len());
+        board = next_list.swap_remove(idx);
+    }
+    board
 }
