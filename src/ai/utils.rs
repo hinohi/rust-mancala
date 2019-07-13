@@ -1,15 +1,21 @@
 use rand::Rng;
 
-use super::Evaluator;
+use super::{Evaluator, Score};
 use crate::board::Board;
 
-pub fn ab_search<E: Evaluator>(board: Board, eval: &E, depth: usize, alpha: i32, beta: i32) -> i32 {
+pub fn ab_search<E: Evaluator>(
+    board: Board,
+    eval: &E,
+    depth: usize,
+    alpha: E::Score,
+    beta: E::Score,
+) -> E::Score {
     if depth == 0 || board.is_finished() {
         return eval.eval(&board);
     }
     let mut alpha = alpha;
     for next in board.list_next() {
-        let a = -ab_search(next, eval, depth - 1, -beta, -alpha);
+        let a = ab_search(next, eval, depth - 1, beta.flip(), alpha.flip()).flip();
         if a > alpha {
             alpha = a;
         }

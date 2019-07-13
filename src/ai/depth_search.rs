@@ -1,6 +1,4 @@
-use std::i32;
-
-use super::{utils::ab_search, Evaluator, AI};
+use super::{utils::ab_search, Evaluator, Score, AI};
 use crate::board::Board;
 
 pub struct DepthSearchAI<E> {
@@ -30,9 +28,16 @@ where
             return next_lists.drain().next().unwrap().1;
         }
         let mut best = vec![];
-        let mut best_score = i32::MIN;
+        let mut best_score = E::Score::MIN;
         for (next, pos_list) in next_lists {
-            let s = -ab_search(next, &self.evaluator, self.max_depth, -10000, 10000);
+            let s = ab_search(
+                next,
+                &self.evaluator,
+                self.max_depth,
+                E::Score::MIN,
+                E::Score::MAX,
+            )
+            .flip();
             if s > best_score {
                 best_score = s;
                 best = pos_list;

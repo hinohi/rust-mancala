@@ -2,20 +2,20 @@ use std::io::stdin;
 
 use rand::{seq::SliceRandom, Rng};
 
-use super::{evaluator::ScoreDiffEvaluator, utils::ab_search, Evaluator, AI};
+use super::{evaluator::ScoreDiffEvaluator, utils::ab_search, Evaluator, Score, AI};
 use crate::board::{Board, PIT};
 
 #[derive(Debug, Default)]
 pub struct InteractiveAI;
 
-fn get_suggest<E: Evaluator>(board: &Board, eval: &E, max_depth: usize) -> Vec<Option<i32>> {
+fn get_suggest<E: Evaluator>(board: &Board, eval: &E, max_depth: usize) -> Vec<Option<E::Score>> {
     let mut ret = vec![None; PIT];
     for (next, pos_list) in board.list_next_with_pos() {
-        let s = -ab_search(next, eval, max_depth, -10000, 10000);
+        let s = ab_search(next, eval, max_depth, E::Score::MIN, E::Score::MAX).flip();
         let pos = pos_list[0];
-        match ret[pos] {
-            None => ret[pos] = Some(s),
-            Some(best) if best < s => ret[pos] = Some(s),
+        match ret.get(pos) {
+            Some(None) => ret[pos] = Some(s),
+            Some(Some(best)) if best < &s => ret[pos] = Some(s),
             _ => (),
         }
     }
@@ -34,7 +34,7 @@ impl InteractiveAI {
             eprint!("{} |", max_depth);
             for best in get_suggest(board, &eval, max_depth) {
                 match best {
-                    Some(best) => eprint!("{:4}", best),
+                    Some(ref best) => eprint!("{:4}", best),
                     None => eprint!("    *"),
                 }
             }

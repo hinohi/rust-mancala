@@ -23,7 +23,14 @@ pub trait AI {
 }
 
 pub trait Evaluator {
-    fn eval(&self, board: &Board) -> i32;
+    type Score: Score;
+    fn eval(&self, board: &Board) -> Self::Score;
+}
+
+pub trait Score: Ord + Copy {
+    const MIN: Self;
+    const MAX: Self;
+    fn flip(&self) -> Self;
 }
 
 pub fn build_ai(s: &str) -> Result<Box<AI>, String> {
