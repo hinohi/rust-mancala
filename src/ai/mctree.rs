@@ -1,6 +1,7 @@
 use rand::Rng;
 
-use super::{utils::random_down, AI};
+use super::evaluator::{MCTreeEvaluator, WinRateScore};
+use super::{Evaluator, Score, AI};
 use crate::board::Board;
 
 #[derive(Debug)]
@@ -28,30 +29,14 @@ where
         if n == 1 {
             return next_lists.drain().next().unwrap().1;
         }
-        let per_con = (self.path_num + n - 1) / n;
-        let mut best = (0, 0, std::i32::MIN);
+        let mut eval = MCTreeEvaluator::new(&mut self.random, (self.path_num + n - 1) / n);
+        // `MCTreeEvaluator::Score::MIN` だと `ambiguous associated type` と怒られる
+        let mut best = WinRateScore::MIN;
         let mut best_pos = vec![];
-        let side = board.side;
         for (board, pos) in next_lists {
-            let mut win = 0;
-            let mut draw = 0;
-            let mut diff = 0;
-            for _ in 0..per_con {
-                let (s0, s1) = random_down(&mut self.random, board.clone()).last_scores();
-                let score = if side == 0 {
-                    i32::from(s0) - i32::from(s1)
-                } else {
-                    i32::from(s1) - i32::from(s0)
-                };
-                if score > 0 {
-                    win += 1;
-                } else if score == 0 {
-                    draw += 1;
-                }
-                diff += score;
-            }
-            if best < (win, draw, diff) {
-                best = (win, draw, diff);
+            let score = eval.eval(&board).flip();
+            if best < score {
+                best = score;
                 best_pos = pos;
             }
         }
