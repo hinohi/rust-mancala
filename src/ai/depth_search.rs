@@ -1,8 +1,7 @@
 use std::i32;
 
-use super::utils::ab_search;
-use super::AI;
-use crate::board::{Board, Evaluation};
+use super::{utils::ab_search, Evaluator, AI};
+use crate::board::Board;
 
 pub struct DepthSearchAI<E> {
     max_depth: usize,
@@ -11,7 +10,7 @@ pub struct DepthSearchAI<E> {
 
 impl<E> DepthSearchAI<E>
 where
-    E: Evaluation,
+    E: Evaluator,
 {
     pub fn new(evaluator: E, max_depth: usize) -> DepthSearchAI<E> {
         DepthSearchAI {
@@ -23,7 +22,7 @@ where
 
 impl<E> AI for DepthSearchAI<E>
 where
-    E: Evaluation,
+    E: Evaluator,
 {
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         let mut next_lists = board.list_next_with_pos();

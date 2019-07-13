@@ -2,13 +2,12 @@ use std::io::stdin;
 
 use rand::{seq::SliceRandom, Rng};
 
-use super::utils::ab_search;
-use super::AI;
-use crate::board::{Board, Evaluation, ScoreDiffEvaluation, PIT};
+use super::{evaluator::ScoreDiffEvaluator, utils::ab_search, Evaluator, AI};
+use crate::board::{Board, PIT};
 
 pub struct InteractiveAI;
 
-fn get_suggest<E: Evaluation>(board: &Board, eval: &E, max_depth: usize) -> Vec<Option<i32>> {
+fn get_suggest<E: Evaluator>(board: &Board, eval: &E, max_depth: usize) -> Vec<Option<i32>> {
     let mut ret = vec![None; PIT];
     for (next, pos_list) in board.list_next_with_pos() {
         let s = -ab_search(next, eval, max_depth, -10000, 10000);
@@ -28,7 +27,7 @@ impl InteractiveAI {
     }
 
     fn print_suggest(&self, board: &Board) {
-        let eval = ScoreDiffEvaluation::new();
+        let eval = ScoreDiffEvaluator::new();
         eprintln!("suggest");
         for max_depth in 1..9 {
             eprint!("{} |", max_depth);

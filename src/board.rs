@@ -186,30 +186,6 @@ impl Board {
     }
 }
 
-pub trait Evaluation {
-    fn eval(&self, board: &Board) -> i32;
-}
-
-#[derive(Debug)]
-pub struct ScoreDiffEvaluation;
-
-impl ScoreDiffEvaluation {
-    pub fn new() -> ScoreDiffEvaluation {
-        ScoreDiffEvaluation {}
-    }
-}
-
-impl Evaluation for ScoreDiffEvaluation {
-    fn eval(&self, board: &Board) -> i32 {
-        let (s0, s1) = board.last_scores();
-        if board.side == 0 {
-            s0 as i32 - s1 as i32
-        } else {
-            s1 as i32 - s0 as i32
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

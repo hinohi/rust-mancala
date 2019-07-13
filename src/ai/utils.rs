@@ -1,12 +1,7 @@
-use crate::board::{Board, Evaluation};
+use super::Evaluator;
+use crate::board::Board;
 
-pub fn ab_search<E: Evaluation>(
-    board: Board,
-    eval: &E,
-    depth: usize,
-    alpha: i32,
-    beta: i32,
-) -> i32 {
+pub fn ab_search<E: Evaluator>(board: Board, eval: &E, depth: usize, alpha: i32, beta: i32) -> i32 {
     if depth == 0 || board.is_finished() {
         return eval.eval(&board);
     }

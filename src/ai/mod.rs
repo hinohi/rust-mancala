@@ -1,4 +1,5 @@
 mod depth_search;
+mod evaluator;
 mod leaf_learned;
 mod mctree;
 mod simple;
@@ -6,20 +7,26 @@ mod sparse;
 mod utils;
 
 pub use self::depth_search::DepthSearchAI;
+pub use self::evaluator::*;
 pub use self::leaf_learned::*;
 pub use self::mctree::MCTree;
 pub use self::simple::{InteractiveAI, RandomAI};
 pub use self::sparse::SparseDepthSearchAI;
 
+use rand::SeedableRng;
+use rand_pcg::Mcg128Xsl64 as Rng;
+
+use crate::board::Board;
+
 pub trait AI {
-    fn sow(&mut self, board: &crate::board::Board) -> Vec<usize>;
+    fn sow(&mut self, board: &Board) -> Vec<usize>;
+}
+
+pub trait Evaluator {
+    fn eval(&self, board: &Board) -> i32;
 }
 
 pub fn build_ai(s: &str) -> Result<Box<AI>, String> {
-    use crate::board::ScoreDiffEvaluation;
-    use rand::SeedableRng;
-    use rand_pcg::Mcg128Xsl64 as Rng;
-
     let args = s.split(':').collect::<Vec<_>>();
     match args[0] {
         "human" => {
@@ -43,7 +50,7 @@ pub fn build_ai(s: &str) -> Result<Box<AI>, String> {
                 Err(e) => return Err(format!("dfs:(max_depth) {}", e)),
             };
             Ok(Box::new(DepthSearchAI::new(
-                ScoreDiffEvaluation::new(),
+                ScoreDiffEvaluator::new(),
                 max_depth,
             )))
         }
