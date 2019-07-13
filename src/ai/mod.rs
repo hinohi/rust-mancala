@@ -2,12 +2,14 @@ mod depth_search;
 mod leaf_learned;
 mod mctree;
 mod simple;
+mod sparse;
 mod utils;
 
 pub use self::depth_search::DepthSearchAI;
 pub use self::leaf_learned::*;
-pub use self::mctree::*;
+pub use self::mctree::MCTree;
 pub use self::simple::{InteractiveAI, RandomAI};
+pub use self::sparse::SparseDepthSearchAI;
 
 pub trait AI {
     fn sow(&mut self, board: &crate::board::Board) -> Vec<usize>;
@@ -55,6 +57,24 @@ pub fn build_ai(s: &str) -> Result<Box<AI>, String> {
             };
             Ok(Box::new(MCTree::new(num as usize, Rng::from_entropy())))
         }
-        _ => Err("(human|random|dfs|mctree)".to_string()),
+        "sparse" => {
+            if args.len() != 3 {
+                return Err("sparse:(first):(num)".to_string());
+            }
+            let first_depth = match args[1].parse() {
+                Ok(d) => d,
+                Err(e) => return Err(format!("sparse:(first):(num) {}", e)),
+            };
+            let num = match args[2].parse() {
+                Ok(n) => n,
+                Err(e) => return Err(format!("sparse:(first):(num) {}", e)),
+            };
+            Ok(Box::new(SparseDepthSearchAI::new(
+                first_depth,
+                num,
+                Rng::from_entropy(),
+            )))
+        }
+        _ => Err("(human|random|dfs|mctree|sparse)".to_string()),
     }
 }
