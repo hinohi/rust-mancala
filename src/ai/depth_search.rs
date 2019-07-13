@@ -32,7 +32,7 @@ where
         for (next, pos_list) in next_lists {
             let s = ab_search(
                 next,
-                &self.evaluator,
+                &mut self.evaluator,
                 self.max_depth,
                 E::Score::MIN,
                 E::Score::MAX,

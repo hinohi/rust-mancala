@@ -24,7 +24,7 @@ pub trait AI {
 
 pub trait Evaluator {
     type Score: Score;
-    fn eval(&self, board: &Board) -> Self::Score;
+    fn eval(&mut self, board: &Board) -> Self::Score;
 }
 
 pub trait Score: Ord + Copy {

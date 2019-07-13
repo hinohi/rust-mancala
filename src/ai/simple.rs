@@ -8,7 +8,11 @@ use crate::board::{Board, PIT};
 #[derive(Debug, Default)]
 pub struct InteractiveAI;
 
-fn get_suggest<E: Evaluator>(board: &Board, eval: &E, max_depth: usize) -> Vec<Option<E::Score>> {
+fn get_suggest<E: Evaluator>(
+    board: &Board,
+    eval: &mut E,
+    max_depth: usize,
+) -> Vec<Option<E::Score>> {
     let mut ret = vec![None; PIT];
     for (next, pos_list) in board.list_next_with_pos() {
         let s = ab_search(next, eval, max_depth, E::Score::MIN, E::Score::MAX).flip();
@@ -28,11 +32,11 @@ impl InteractiveAI {
     }
 
     fn print_suggest(&self, board: &Board) {
-        let eval = ScoreDiffEvaluator::new();
+        let mut eval = ScoreDiffEvaluator::new();
         eprintln!("suggest");
         for max_depth in 1..9 {
             eprint!("{} |", max_depth);
-            for best in get_suggest(board, &eval, max_depth) {
+            for best in get_suggest(board, &mut eval, max_depth) {
                 match best {
                     Some(ref best) => eprint!("{:4}", best),
                     None => eprint!("    *"),

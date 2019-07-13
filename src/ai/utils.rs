@@ -5,7 +5,7 @@ use crate::board::Board;
 
 pub fn ab_search<E: Evaluator>(
     board: Board,
-    eval: &E,
+    eval: &mut E,
     depth: usize,
     alpha: E::Score,
     beta: E::Score,
