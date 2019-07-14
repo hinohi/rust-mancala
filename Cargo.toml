@@ -7,5 +7,4 @@ edition = "2018"
 [dependencies]
 rand = "*"
 rand_pcg = "*"
-lazy_static = "*"
 fnv = "*"

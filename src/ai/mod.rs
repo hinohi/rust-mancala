@@ -1,6 +1,5 @@
 mod depth_search;
 mod evaluator;
-mod leaf_learned;
 mod mctree;
 mod simple;
 mod sparse;
@@ -8,7 +7,6 @@ mod utils;
 
 pub use self::depth_search::DepthSearchAI;
 pub use self::evaluator::*;
-pub use self::leaf_learned::*;
 pub use self::mctree::MCTree;
 pub use self::simple::{InteractiveAI, RandomAI};
 pub use self::sparse::SparseDepthSearchAI;
