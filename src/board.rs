@@ -1,6 +1,7 @@
+use std::collections::HashMap;
 use std::fmt::{self, Write};
 
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashSet;
 
 pub const PIT: usize = 6;
 pub const SEED: u8 = 4;
@@ -138,6 +139,8 @@ impl Board {
         self.side = 1 - self.side;
     }
 
+    /// 次のターンの盤面の一覧を返す
+    /// `fnv::FnvHashSet` を返すので、返り値を `iter` した順序は毎回同じであることがあることに注意
     pub fn list_next(&self) -> FnvHashSet<Board> {
         let mut set = FnvHashSet::with_capacity_and_hasher(32, Default::default());
         if self.is_finished() {
@@ -161,8 +164,10 @@ impl Board {
         set
     }
 
-    pub fn list_next_with_pos(&self) -> FnvHashMap<Board, Vec<usize>> {
-        let mut map = FnvHashMap::with_capacity_and_hasher(32, Default::default());
+    /// 次のターンの盤面とその盤面にするために必要な打ち手のペアの一覧を返す
+    /// `std::collections::HashMap` を返すので、返り値を `iter` した順序は毎回異なることを期待して良い
+    pub fn list_next_with_pos(&self) -> HashMap<Board, Vec<usize>> {
+        let mut map = HashMap::with_capacity(32);
         if self.is_finished() {
             return map;
         }
