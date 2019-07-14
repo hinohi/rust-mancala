@@ -37,10 +37,36 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
     let args = s.split(':').collect::<Vec<_>>();
     match args[0] {
         "human" => {
-            if args.len() != 1 {
-                return Err("human".to_string());
+            if args.len() == 1 {
+                return Ok(Box::new(InteractiveAI::new(ScoreDiffEvaluator::new(), 0)));
             }
-            Ok(Box::new(InteractiveAI::new()))
+            if args.len() != 3 {
+                return Err("human[:(eval):(max_depth)]".to_string());
+            }
+            let max_depth = match args[2].parse() {
+                Ok(d) => d,
+                Err(e) => return Err(format!("human[:(eval):(max_depth)] {}", e)),
+            };
+            let eval_args = args[1].split('-').collect::<Vec<_>>();
+            Ok(match eval_args[0] {
+                "diff" => Box::new(InteractiveAI::new(ScoreDiffEvaluator::new(), max_depth)),
+                "mc" => {
+                    if eval_args.len() != 2 {
+                        return Err("human:mc-(num):(max_depth)".to_string());
+                    }
+                    let num = match eval_args[1].parse() {
+                        Ok(d) => d,
+                        Err(e) => return Err(format!("human:mc-(num):(max_depth) {}", e)),
+                    };
+                    Box::new(InteractiveAI::new(
+                        MCTreeEvaluator::new(Rng::from_entropy(), num),
+                        max_depth,
+                    ))
+                }
+                _ => {
+                    return Err("human[:(diff|mc-(num)):(max_depth)]".to_string());
+                }
+            })
         }
         "random" => {
             if args.len() != 1 {

@@ -2,11 +2,14 @@ use std::io::stdin;
 
 use rand::{seq::SliceRandom, Rng};
 
-use super::{evaluator::ScoreDiffEvaluator, utils::ab_search, Evaluator, Score, AI};
+use super::{utils::ab_search, Evaluator, Score, AI};
 use crate::board::{Board, PIT};
 
 #[derive(Debug, Default)]
-pub struct InteractiveAI;
+pub struct InteractiveAI<E> {
+    evaluator: E,
+    max_depth: usize,
+}
 
 fn get_suggest<E: Evaluator>(
     board: &Board,
@@ -26,30 +29,39 @@ fn get_suggest<E: Evaluator>(
     ret
 }
 
-impl InteractiveAI {
-    pub fn new() -> InteractiveAI {
-        InteractiveAI {}
+impl<E> InteractiveAI<E>
+where
+    E: Evaluator,
+{
+    pub fn new(evaluator: E, max_depth: usize) -> InteractiveAI<E> {
+        InteractiveAI {
+            evaluator,
+            max_depth,
+        }
     }
 
-    fn print_suggest(&self, board: &Board) {
-        let mut eval = ScoreDiffEvaluator::new();
+    fn print_suggest(&mut self, board: &Board) {
         eprintln!("suggest");
-        for max_depth in 1..9 {
-            eprint!("{} |", max_depth);
-            for best in get_suggest(board, &mut eval, max_depth) {
-                match best {
-                    Some(ref best) => eprint!("{:4}", best),
-                    None => eprint!("    *"),
-                }
+        for (pos, best) in get_suggest(board, &mut self.evaluator, self.max_depth)
+            .iter()
+            .enumerate()
+        {
+            match best {
+                Some(ref best) => eprintln!("{} {:?}", pos, best),
+                None => eprintln!("{} *", pos),
             }
-            eprintln!("|");
         }
     }
 }
 
-impl AI for InteractiveAI {
+impl<E> AI for InteractiveAI<E>
+where
+    E: Evaluator,
+{
     fn sow(&mut self, board: &Board) -> Vec<usize> {
-        self.print_suggest(board);
+        if self.max_depth > 0 {
+            self.print_suggest(board);
+        }
         loop {
             eprint!("your turn: ");
             let mut buf = String::new();
