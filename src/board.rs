@@ -1,5 +1,6 @@
-use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Write};
+
+use fnv::{FnvHashMap, FnvHashSet};
 
 pub const PIT: usize = 6;
 pub const SEED: u8 = 4;
@@ -137,8 +138,8 @@ impl Board {
         self.side = 1 - self.side;
     }
 
-    pub fn list_next(&self) -> HashSet<Board> {
-        let mut set = HashSet::new();
+    pub fn list_next(&self) -> FnvHashSet<Board> {
+        let mut set = FnvHashSet::with_capacity_and_hasher(32, Default::default());
         if self.is_finished() {
             return set;
         }
@@ -160,8 +161,8 @@ impl Board {
         set
     }
 
-    pub fn list_next_with_pos(&self) -> HashMap<Board, Vec<usize>> {
-        let mut map = HashMap::new();
+    pub fn list_next_with_pos(&self) -> FnvHashMap<Board, Vec<usize>> {
+        let mut map = FnvHashMap::with_capacity_and_hasher(32, Default::default());
         if self.is_finished() {
             return map;
         }
