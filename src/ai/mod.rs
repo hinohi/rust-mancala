@@ -11,6 +11,8 @@ pub use self::mctree::MCTree;
 pub use self::simple::{InteractiveAI, RandomAI};
 pub use self::sparse::SparseDepthSearchAI;
 
+use std::fmt::Debug;
+
 use rand::SeedableRng;
 use rand_pcg::Mcg128Xsl64 as Rng;
 
@@ -25,7 +27,7 @@ pub trait Evaluator {
     fn eval(&mut self, board: &Board) -> Self::Score;
 }
 
-pub trait Score: Ord + Copy {
+pub trait Score: Ord + Copy + Debug {
     const MIN: Self;
     const MAX: Self;
     fn flip(&self) -> Self;

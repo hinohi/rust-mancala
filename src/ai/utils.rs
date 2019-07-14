@@ -38,3 +38,41 @@ pub fn random_down<R: Rng>(random: &mut R, board: Board) -> Board {
     }
     board
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{MCTreeEvaluator, ScoreDiffEvaluator, WinRateScore};
+    use rand_pcg::Mcg128Xsl64;
+
+    #[test]
+    fn smoke_ab_search_diff() {
+        let mut eval = ScoreDiffEvaluator::new();
+        ab_search(
+            Board::new(true),
+            &mut eval,
+            5,
+            <i32 as Score>::MIN,
+            <i32 as Score>::MAX,
+        );
+    }
+
+    #[test]
+    fn smoke_ab_search_mc() {
+        let mut eval = MCTreeEvaluator::new(Mcg128Xsl64::new(1), 10);
+        ab_search(
+            Board::new(true),
+            &mut eval,
+            2,
+            <WinRateScore as Score>::MIN,
+            <WinRateScore as Score>::MAX,
+        );
+    }
+
+    #[test]
+    fn smoke_random_down() {
+        let mut random = Mcg128Xsl64::new(1);
+        let board = random_down(&mut random, Board::new(false));
+        assert!(board.is_finished());
+    }
+}

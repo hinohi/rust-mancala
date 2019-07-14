@@ -4,8 +4,8 @@ use super::{utils::random_down, Evaluator, Score};
 use crate::board::Board;
 
 impl Score for i32 {
-    const MIN: Self = std::i32::MIN;
-    const MAX: Self = std::i32::MAX;
+    const MIN: Self = std::i32::MIN + 1;
+    const MAX: Self = std::i32::MAX - 1;
     #[inline]
     fn flip(&self) -> Self {
         -*self
@@ -13,8 +13,8 @@ impl Score for i32 {
 }
 
 impl Score for i8 {
-    const MIN: Self = std::i8::MIN;
-    const MAX: Self = std::i8::MAX;
+    const MIN: Self = std::i8::MIN + 1;
+    const MAX: Self = std::i8::MAX - 1;
     #[inline]
     fn flip(&self) -> Self {
         -*self
@@ -92,13 +92,13 @@ impl Score for WinRateScore {
         win: 0,
         draw: 0,
         lose: 0,
-        score: std::i32::MIN,
+        score: std::i32::MIN + 1,
     };
     const MAX: Self = WinRateScore {
         win: std::u32::MAX,
         draw: std::u32::MAX,
         lose: 0,
-        score: std::i32::MAX,
+        score: std::i32::MAX - 1,
     };
     fn flip(&self) -> Self {
         WinRateScore {
