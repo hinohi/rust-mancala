@@ -5,12 +5,12 @@ pub struct Game {
     board: Board,
     turn: usize,
     show_board: bool,
-    ai_a: Box<AI>,
-    ai_b: Box<AI>,
+    ai_a: Box<dyn AI>,
+    ai_b: Box<dyn AI>,
 }
 
 impl Game {
-    pub fn new(stealing: bool, ai_a: Box<AI>, ai_b: Box<AI>) -> Game {
+    pub fn new(stealing: bool, ai_a: Box<dyn AI>, ai_b: Box<dyn AI>) -> Game {
         Game {
             board: Board::new(stealing),
             turn: 0,

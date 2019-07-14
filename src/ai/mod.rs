@@ -33,7 +33,7 @@ pub trait Score: Ord + Copy {
     fn flip(&self) -> Self;
 }
 
-pub fn build_ai(s: &str) -> Result<Box<AI>, String> {
+pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
     let args = s.split(':').collect::<Vec<_>>();
     match args[0] {
         "human" => {
