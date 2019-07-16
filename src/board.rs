@@ -149,8 +149,8 @@ impl Board {
         let mut stack = Vec::with_capacity(4);
         stack.push(self.clone());
         while let Some(board) = stack.pop() {
-            for pos in 0..PIT {
-                if board.seeds[board.side][pos] == 0 {
+            for (pos, &s) in board.seeds[board.side].iter().enumerate() {
+                if s == 0 {
                     continue;
                 }
                 let mut copied = board.clone();
@@ -175,8 +175,8 @@ impl Board {
         let mut stack = Vec::with_capacity(4);
         stack.push((self.clone(), Vec::with_capacity(1)));
         while let Some((board, pos_list)) = stack.pop() {
-            for pos in 0..PIT {
-                if board.seeds[board.side][pos] == 0 {
+            for (pos, &s) in board.seeds[board.side].iter().enumerate() {
+                if s == 0 {
                     continue;
                 }
                 let mut copied = board.clone();
