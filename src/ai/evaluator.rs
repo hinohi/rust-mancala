@@ -55,7 +55,7 @@ impl WinRateScore {
         Default::default()
     }
 
-    pub fn add(&mut self, score: i32) {
+    pub fn count(&mut self, score: i32) {
         if score > 0 {
             self.win += 1;
         } else if score == 0 {
@@ -64,6 +64,15 @@ impl WinRateScore {
             self.lose += 1;
         }
         self.score += score;
+    }
+
+    pub fn rate(&self) -> (f64, f64, f64) {
+        let n = f64::from(self.win + self.draw + self.lose);
+        (
+            f64::from(self.win) / n,
+            f64::from(self.draw) / n,
+            f64::from(self.score) / n,
+        )
     }
 }
 
@@ -84,6 +93,18 @@ impl Ord for WinRateScore {
 impl PartialOrd for WinRateScore {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl std::ops::Add for WinRateScore {
+    type Output = WinRateScore;
+    fn add(self, other: Self) -> Self::Output {
+        WinRateScore {
+            win: self.win + other.win,
+            draw: self.draw + other.draw,
+            lose: self.lose + other.lose,
+            score: self.score + other.score,
+        }
     }
 }
 
@@ -132,7 +153,7 @@ impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
         let mut score = Self::Score::default();
         for _ in 0..self.num {
             let (s0, s1) = random_down(&mut self.random, board.clone()).last_scores();
-            score.add(if board.side == 0 {
+            score.count(if board.side == 0 {
                 i32::from(s0) - i32::from(s1)
             } else {
                 i32::from(s1) - i32::from(s0)
