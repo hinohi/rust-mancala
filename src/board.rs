@@ -146,7 +146,8 @@ impl Board {
         if self.is_finished() {
             return set;
         }
-        let mut stack = vec![self.clone()];
+        let mut stack = Vec::with_capacity(4);
+        stack.push(self.clone());
         while let Some(board) = stack.pop() {
             for pos in 0..PIT {
                 if board.seeds[board.side][pos] == 0 {
@@ -171,7 +172,8 @@ impl Board {
         if self.is_finished() {
             return map;
         }
-        let mut stack = vec![(self.clone(), vec![])];
+        let mut stack = Vec::with_capacity(4);
+        stack.push((self.clone(), Vec::with_capacity(1)));
         while let Some((board, pos_list)) = stack.pop() {
             for pos in 0..PIT {
                 if board.seeds[board.side][pos] == 0 {
