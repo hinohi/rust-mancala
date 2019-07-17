@@ -98,6 +98,14 @@ impl Board {
         self.stealing
     }
 
+    pub fn self_seeds(&self) -> &[u8] {
+        &self.seeds[self.side.as_usize()]
+    }
+
+    pub fn opposite_seed(&self) -> &[u8] {
+        &self.seeds[self.side.turned().as_usize()]
+    }
+
     pub fn last_scores(&self) -> (u8, u8) {
         (
             self.score[0] + self.seeds[0].iter().sum::<u8>(),

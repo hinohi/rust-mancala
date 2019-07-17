@@ -33,8 +33,10 @@ impl Game {
         } else {
             self.ai_b.sow(&self.board)
         };
+        let side = self.board.side();
         for &pos in pos_list.iter() {
             assert!(self.board.can_sow(pos).is_ok());
+            assert_eq!(self.board.side(), side);
             self.board.sow(pos);
         }
         if self.show_board {

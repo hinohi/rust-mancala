@@ -1,5 +1,6 @@
 mod depth_search;
 mod evaluator;
+mod greedy;
 mod mctree;
 mod simple;
 mod sparse;
@@ -7,6 +8,7 @@ mod utils;
 
 pub use self::depth_search::DepthSearchAI;
 pub use self::evaluator::*;
+pub use self::greedy::GreedyAI;
 pub use self::mctree::MCTree;
 pub use self::simple::{InteractiveAI, RandomAI};
 pub use self::sparse::SparseDepthSearchAI;
@@ -14,7 +16,7 @@ pub use self::sparse::SparseDepthSearchAI;
 use std::fmt::Debug;
 
 use rand::SeedableRng;
-use rand_pcg::Mcg128Xsl64 as Rng;
+use rand_pcg::{Mcg128Xsl64 as Rng, Mcg128Xsl64};
 
 use crate::board::Board;
 
@@ -131,6 +133,12 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                 Rng::from_entropy(),
             )))
         }
-        _ => Err("(human|random|dfs|mctree|sparse)".to_string()),
+        "greedy" => {
+            if args.len() != 1 {
+                return Err("greedy".to_string());
+            }
+            Ok(Box::new(GreedyAI::new(Mcg128Xsl64::from_entropy())))
+        }
+        _ => Err("(human|random|dfs|mctree|sparse|greedy)".to_string()),
     }
 }
