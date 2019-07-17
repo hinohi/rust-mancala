@@ -1,5 +1,7 @@
+use std::time::Instant;
+
 use super::AI;
-use crate::board::*;
+use crate::board::{Board, Side};
 
 pub struct Game {
     board: Board,
@@ -25,7 +27,8 @@ impl Game {
     }
 
     fn proceed(&mut self) {
-        let pos_list = if self.board.side == 0 {
+        let time = Instant::now();
+        let pos_list = if self.board.side() == Side::First {
             self.ai_a.sow(&self.board)
         } else {
             self.ai_b.sow(&self.board)
@@ -35,7 +38,7 @@ impl Game {
             self.board.sow(pos);
         }
         if self.show_board {
-            println!("{:?}", pos_list);
+            println!("{:?} ({}ms)", pos_list, time.elapsed().as_millis());
             println!("{}", self.board);
         }
         self.turn += 1;

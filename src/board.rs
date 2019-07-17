@@ -8,16 +8,42 @@ pub const SEED: u8 = 4;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Board {
-    pub side: usize,
+    side: Side,
     stealing: bool,
     seeds: [[u8; PIT]; 2],
     score: [u8; 2],
 }
 
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
+pub enum Side {
+    First,
+    Second,
+}
+
+use Side::*;
+
+impl Side {
+    #[inline]
+    pub fn as_usize(self) -> usize {
+        match self {
+            First => 0,
+            Second => 1,
+        }
+    }
+
+    #[inline]
+    pub fn turned(&self) -> Side {
+        match self {
+            First => Second,
+            Second => First,
+        }
+    }
+}
+
 impl fmt::Display for Board {
     fn fmt(&self, dest: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
-        if self.side == 1 {
+        if self.side == Second {
             s += "* |";
         } else {
             s += "  |";
@@ -34,7 +60,7 @@ impl fmt::Display for Board {
                 .join("|")
         )
         .unwrap();
-        if self.side == 0 {
+        if self.side == First {
             s += "\n* |  ";
         } else {
             s += "\n  |  ";
@@ -57,11 +83,19 @@ impl fmt::Display for Board {
 impl Board {
     pub fn new(stealing: bool) -> Board {
         Board {
-            side: 0,
+            side: First,
             stealing,
             seeds: [[SEED; PIT]; 2],
             score: [0, 0],
         }
+    }
+
+    pub fn side(&self) -> Side {
+        self.side
+    }
+
+    pub fn stealing(&self) -> bool {
+        self.stealing
     }
 
     pub fn last_scores(&self) -> (u8, u8) {
@@ -79,28 +113,24 @@ impl Board {
         self.seeds[0].iter().all(|s| *s == 0) || self.seeds[1].iter().all(|s| *s == 0)
     }
 
-    pub fn seeds(&self) -> &[[u8; PIT]; 2] {
-        &self.seeds
-    }
-
-    fn move_seed(&mut self, side: usize, pos: usize, num: usize) -> (usize, usize) {
+    fn move_seed(&mut self, side: Side, pos: usize, num: usize) -> (Side, usize) {
         if pos + num <= PIT {
             for i in pos..pos + num {
-                self.seeds[side][i] += 1;
+                self.seeds[side.as_usize()][i] += 1;
             }
             return (side, pos + num - 1);
         }
         for i in pos..PIT {
-            self.seeds[side][i] += 1;
+            self.seeds[side.as_usize()][i] += 1;
         }
         if self.side == side {
-            self.score[side] += 1;
+            self.score[side.as_usize()] += 1;
             if pos + num == PIT + 1 {
                 return (side, PIT);
             }
-            self.move_seed(1 - side, 0, pos + num - PIT - 1)
+            self.move_seed(side.turned(), 0, pos + num - PIT - 1)
         } else {
-            self.move_seed(1 - side, 0, pos + num - PIT)
+            self.move_seed(side.turned(), 0, pos + num - PIT)
         }
     }
 
@@ -111,32 +141,32 @@ impl Board {
                 PIT - 1
             ));
         }
-        if self.seeds[self.side][pos] == 0 {
+        if self.seeds[self.side.as_usize()][pos] == 0 {
             return Err("そこには石が残っていません".to_string());
         }
         Ok(())
     }
 
     pub fn sow(&mut self, pos: usize) {
-        let num = self.seeds[self.side][pos];
-        self.seeds[self.side][pos] = 0;
+        let num = self.seeds[self.side.as_usize()][pos];
+        self.seeds[self.side.as_usize()][pos] = 0;
         let (side, end_pos) = self.move_seed(self.side, pos + 1, num as usize);
         if side == self.side {
             if end_pos == PIT {
                 if !self.is_finished() {
                     return;
                 }
-            } else if self.stealing && self.seeds[side][end_pos] == 1 {
+            } else if self.stealing && self.seeds[side.as_usize()][end_pos] == 1 {
                 let opposite_pos = PIT - 1 - end_pos;
-                let opposite_num = self.seeds[1 - side][opposite_pos];
+                let opposite_num = self.seeds[side.turned().as_usize()][opposite_pos];
                 if opposite_num > 0 {
-                    self.seeds[side][end_pos] = 0;
-                    self.seeds[1 - side][opposite_pos] = 0;
-                    self.score[side] += opposite_num + 1;
+                    self.seeds[side.as_usize()][end_pos] = 0;
+                    self.seeds[side.turned().as_usize()][opposite_pos] = 0;
+                    self.score[side.as_usize()] += opposite_num + 1;
                 }
             }
         }
-        self.side = 1 - self.side;
+        self.side = self.side.turned();
     }
 
     /// 次のターンの盤面の一覧を返す
@@ -149,7 +179,7 @@ impl Board {
         let mut stack = Vec::with_capacity(4);
         stack.push(self.clone());
         while let Some(board) = stack.pop() {
-            for (pos, &s) in board.seeds[board.side].iter().enumerate() {
+            for (pos, &s) in board.seeds[board.side.as_usize()].iter().enumerate() {
                 if s == 0 {
                     continue;
                 }
@@ -175,7 +205,7 @@ impl Board {
         let mut stack = Vec::with_capacity(4);
         stack.push((self.clone(), Vec::with_capacity(1)));
         while let Some((board, pos_list)) = stack.pop() {
-            for (pos, &s) in board.seeds[board.side].iter().enumerate() {
+            for (pos, &s) in board.seeds[board.side.as_usize()].iter().enumerate() {
                 if s == 0 {
                     continue;
                 }
@@ -206,25 +236,25 @@ mod tests {
         }
         let mut board = Board::new(true);
         board.sow(2);
-        assert_eq!(board.side, 0);
+        assert_eq!(board.side, First);
         assert_eq!(board.scores(), (1, 0));
         board.sow(5);
-        assert_eq!(board.side, 1);
+        assert_eq!(board.side, Second);
         assert_eq!(board.scores(), (2, 0));
         board.sow(1);
-        assert_eq!(board.side, 1);
+        assert_eq!(board.side, Second);
         assert_eq!(board.scores(), (2, 1));
         board.sow(5);
-        assert_eq!(board.side, 0);
+        assert_eq!(board.side, First);
         assert_eq!(board.scores(), (2, 2));
         board.sow(1);
-        assert_eq!(board.side, 0);
+        assert_eq!(board.side, First);
         assert_eq!(board.scores(), (3, 2));
         board.sow(5);
-        assert_eq!(board.side, 0);
+        assert_eq!(board.side, First);
         assert_eq!(board.scores(), (4, 2));
         board.sow(0);
-        assert_eq!(board.side, 1);
+        assert_eq!(board.side, Second);
         assert_eq!(board.scores(), (10, 2));
         assert_eq!(board.last_scores(), (29, 19));
     }
@@ -237,25 +267,25 @@ mod tests {
         }
         let mut board = Board::new(false);
         board.sow(2);
-        assert_eq!(board.side, 0);
+        assert_eq!(board.side, First);
         assert_eq!(board.scores(), (1, 0));
         board.sow(5);
-        assert_eq!(board.side, 1);
+        assert_eq!(board.side, Second);
         assert_eq!(board.scores(), (2, 0));
         board.sow(1);
-        assert_eq!(board.side, 1);
+        assert_eq!(board.side, Second);
         assert_eq!(board.scores(), (2, 1));
         board.sow(5);
-        assert_eq!(board.side, 0);
+        assert_eq!(board.side, First);
         assert_eq!(board.scores(), (2, 2));
         board.sow(1);
-        assert_eq!(board.side, 0);
+        assert_eq!(board.side, First);
         assert_eq!(board.scores(), (3, 2));
         board.sow(5);
-        assert_eq!(board.side, 0);
+        assert_eq!(board.side, First);
         assert_eq!(board.scores(), (4, 2));
         board.sow(0);
-        assert_eq!(board.side, 1);
+        assert_eq!(board.side, Second);
         assert_eq!(board.scores(), (4, 2));
         assert_eq!(board.last_scores(), (24, 24));
     }
