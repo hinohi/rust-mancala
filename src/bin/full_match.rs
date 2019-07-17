@@ -5,19 +5,13 @@ use mancala_rust::*;
 fn main() {
     let list = [
         "random",
-        "dfs:mc-10:1",
-        "dfs:mc-10:2",
-        "dfs:mc-10:3",
-        "dfs:mc-10:4",
-        "dfs:mc-100:1",
-        "dfs:mc-100:2",
-        "dfs:mc-100:3",
-        "dfs:mc-1000:1",
-        "dfs:mc-1000:2",
+        "greedy",
+        "dfs:diff:3",
+        "dfs:diff:5",
         "dfs:diff:7",
-        "dfs:diff:9",
+        "mctree:8",
         "mctree:10",
-        "mctree:14",
+        "mctree:12",
     ];
     let args = args().collect::<Vec<_>>();
     let stealing = args[1].parse().unwrap();
