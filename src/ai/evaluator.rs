@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use super::{utils::random_down, Evaluator, Score};
-use crate::board::Board;
+use crate::board::{Board, Side};
 
 impl Score for i32 {
     const MIN: Self = std::i32::MIN + 1;
@@ -34,7 +34,7 @@ impl Evaluator for ScoreDiffEvaluator {
     type Score = i32;
     fn eval(&mut self, board: &Board) -> Self::Score {
         let (s0, s1) = board.last_scores();
-        if board.side == 0 {
+        if board.side() == Side::First {
             i32::from(s0) - i32::from(s1)
         } else {
             i32::from(s1) - i32::from(s0)
@@ -153,7 +153,7 @@ impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
         let mut score = Self::Score::default();
         for _ in 0..self.num {
             let (s0, s1) = random_down(&mut self.random, board.clone()).last_scores();
-            score.count(if board.side == 0 {
+            score.count(if board.side() == Side::First {
                 i32::from(s0) - i32::from(s1)
             } else {
                 i32::from(s1) - i32::from(s0)
