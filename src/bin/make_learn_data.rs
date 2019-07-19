@@ -3,7 +3,6 @@ use rand::SeedableRng;
 use rand_pcg::Mcg128Xsl64;
 
 use mancala_rust::*;
-use std::io::Write;
 
 fn raw_scores(board: &Board) -> i8 {
     let (s0, s1) = board.scores();
@@ -56,7 +55,7 @@ fn search(data: &mut FnvHashMap<u64, (i8, u8)>, board: Board, depth: u8) -> Opti
 fn list_path() -> Vec<Board> {
     let mut board = Board::new(STEALING);
     let mut ret = vec![board.clone()];
-    let mut ai = MCTree::new(1024, Mcg128Xsl64::from_entropy());
+    let mut ai = MCTree::new(256, Mcg128Xsl64::from_entropy());
     while !board.is_finished() {
         let pos_list = ai.sow(&board);
         for pos in pos_list {
@@ -115,6 +114,8 @@ fn load() -> FnvHashMap<u64, (i8, u8)> {
 }
 
 fn save(data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
+    use std::io::Write;
+
     let name = format!("p{}s{}_{}.dat", PIT, SEED, STEALING);
     let mut f = std::io::BufWriter::new(std::fs::File::create(&name)?);
     f.write_all(&mut data.len().to_le_bytes())?;
@@ -127,7 +128,7 @@ fn save(data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
 
 fn main() {
     let mut data = load();
-    for i in 0..10000 {
+    for i in 0..100 {
         let mut path = list_path();
         while let Some(board) = path.pop() {
             if search(&mut data, board, 20).is_none() {
@@ -136,5 +137,18 @@ fn main() {
         }
         println!("{} {}", i, data.len());
     }
-    eprintln!("save: {:?}", save(&data));
+
+    println!("save: {:?}", save(&data));
+
+    println!("depth histogram");
+    let mut hist = [0; 256];
+    for (_, depth) in data.values() {
+        hist[*depth as usize] += 1;
+    }
+    for (depth, count) in hist.iter().enumerate() {
+        println!("{} {}", depth, count);
+        if *count == 0 {
+            break;
+        }
+    }
 }
