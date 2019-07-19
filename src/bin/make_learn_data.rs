@@ -119,7 +119,7 @@ fn save(data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
     let name = format!("p{}s{}_{}.dat", PIT, SEED, STEALING);
     let mut f = std::io::BufWriter::new(std::fs::File::create(&name)?);
     f.write_all(&mut data.len().to_le_bytes())?;
-    for (key, value) in data.iter() {
+    for (key, value) in data.iter().take(1 << 27) {
         f.write_all(&mut key.to_le_bytes())?;
         f.write_all(&mut [value.0 as u8, value.1])?;
     }
@@ -128,7 +128,7 @@ fn save(data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
 
 fn main() {
     let mut data = load();
-    for i in 1..=100000 {
+    for i in 1..=50_000 {
         let mut path = list_path();
         while let Some(board) = path.pop() {
             if search(&mut data, board, 20).is_none() {
@@ -144,8 +144,11 @@ fn main() {
 
     println!("depth histogram");
     let mut hist = [0; 256];
-    for (_, depth) in data.values() {
+    for (key, (score, depth)) in data.iter() {
         hist[*depth as usize] += 1;
+        if *depth > 33 {
+            println!("{:?} {}", from_compact_key(*key), *score);
+        }
     }
     for (depth, count) in hist.iter().enumerate() {
         println!("{} {}", depth, count);
