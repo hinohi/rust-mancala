@@ -24,26 +24,29 @@ fn search(data: &mut FnvHashMap<u64, (i8, u8)>, board: Board, depth: u8) -> Opti
     if let Some((l, d)) = data.get(&key) {
         return Some((raw_scores(&board) + *l, *d));
     }
-    if depth == 0 {
-        return None;
-    }
     if board.is_finished() {
         let s = raw_scores(&board);
         let l = seed_scores(&board);
         data.insert(key, (l, 0));
         return Some((s + l, 0));
     }
+    if depth == 0 {
+        return None;
+    }
     let mut best_score = -128;
-    let mut best_depth = 0;
+    let mut best_depth = 127;
     for next in board.list_next() {
         let a = search(data, next, depth - 1);
         match a {
             None => return None,
             Some((s, d)) => {
                 let s = -s;
+                let d = d + 1;
                 if s > best_score {
                     best_score = s;
-                    best_depth = d + 1;
+                    best_depth = d;
+                } else if s == best_score && best_depth > d {
+                    best_depth = d
                 }
             }
         }
@@ -52,10 +55,9 @@ fn search(data: &mut FnvHashMap<u64, (i8, u8)>, board: Board, depth: u8) -> Opti
     Some((best_score, best_depth))
 }
 
-fn list_path() -> Vec<Board> {
+fn list_path(ai: &mut MCTree<Mcg128Xsl64>) -> Vec<Board> {
     let mut board = Board::new(STEALING);
     let mut ret = vec![board.clone()];
-    let mut ai = MCTree::new(256, Mcg128Xsl64::from_entropy());
     while !board.is_finished() {
         let pos_list = ai.sow(&board);
         for pos in pos_list {
@@ -119,7 +121,7 @@ fn save(data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
     let name = format!("p{}s{}_{}.dat", PIT, SEED, STEALING);
     let mut f = std::io::BufWriter::new(std::fs::File::create(&name)?);
     f.write_all(&mut data.len().to_le_bytes())?;
-    for (key, value) in data.iter().take(1 << 27) {
+    for (key, value) in data.iter().take(1 << 28) {
         f.write_all(&mut key.to_le_bytes())?;
         f.write_all(&mut [value.0 as u8, value.1])?;
     }
@@ -127,9 +129,10 @@ fn save(data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
 }
 
 fn main() {
+    let mut ai = MCTree::new(256, Mcg128Xsl64::from_entropy());
     let mut data = load();
-    for i in 1..=50_000 {
-        let mut path = list_path();
+    for i in 1..=30_000_000 {
+        let mut path = list_path(&mut ai);
         while let Some(board) = path.pop() {
             if search(&mut data, board, 20).is_none() {
                 break;
@@ -146,8 +149,8 @@ fn main() {
     let mut hist = [0; 256];
     for (key, (score, depth)) in data.iter() {
         hist[*depth as usize] += 1;
-        if *depth > 33 {
-            println!("{:?} {}", from_compact_key(*key), *score);
+        if *depth > 30 {
+            println!("{:?} depth={} {}", from_compact_key(*key), depth, score);
         }
     }
     for (depth, count) in hist.iter().enumerate() {
