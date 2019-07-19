@@ -128,14 +128,16 @@ fn save(data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
 
 fn main() {
     let mut data = load();
-    for i in 0..100 {
+    for i in 1..=100000 {
         let mut path = list_path();
         while let Some(board) = path.pop() {
             if search(&mut data, board, 20).is_none() {
                 break;
             }
         }
-        println!("{} {}", i, data.len());
+        if i % 100 == 0 {
+            println!("{} {}", i, data.len());
+        }
     }
 
     println!("save: {:?}", save(&data));
