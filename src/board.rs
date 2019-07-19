@@ -232,6 +232,48 @@ impl Board {
     }
 }
 
+pub fn compact_key(board: &Board) -> u64 {
+    let s = board.self_seeds();
+    let k0 = (u64::from(s[0]) << 10) + (u64::from(s[1]) << 5) + u64::from(s[2]);
+    let k1 = (u64::from(s[3]) << 10) + (u64::from(s[4]) << 5) + u64::from(s[5]);
+    let s = board.opposite_seed();
+    let k2 = (u64::from(s[0]) << 10) + (u64::from(s[1]) << 5) + u64::from(s[2]);
+    let k3 = (u64::from(s[3]) << 10) + (u64::from(s[4]) << 5) + u64::from(s[5]);
+    (k0 << 48) + (k1 << 32) + (k2 << 16) + k3
+}
+
+pub fn from_compact_key(key: u64) -> [u8; 12] {
+    let mut ret = [0; 12];
+
+    ret[11] = (key & 0b11111) as u8;
+    let key = key >> 5;
+    ret[10] = (key & 0b11111) as u8;
+    let key = key >> 5;
+    ret[9] = (key & 0b11111) as u8;
+    let key = key >> 6;
+
+    ret[8] = (key & 0b11111) as u8;
+    let key = key >> 5;
+    ret[7] = (key & 0b11111) as u8;
+    let key = key >> 5;
+    ret[6] = (key & 0b11111) as u8;
+    let key = key >> 6;
+
+    ret[5] = (key & 0b11111) as u8;
+    let key = key >> 5;
+    ret[4] = (key & 0b11111) as u8;
+    let key = key >> 5;
+    ret[3] = (key & 0b11111) as u8;
+    let key = key >> 6;
+
+    ret[2] = (key & 0b11111) as u8;
+    let key = key >> 5;
+    ret[1] = (key & 0b11111) as u8;
+    let key = key >> 5;
+    ret[0] = (key & 0b11111) as u8;
+    ret
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -296,5 +338,38 @@ mod tests {
         assert_eq!(board.side, Second);
         assert_eq!(board.scores(), (4, 2));
         assert_eq!(board.last_scores(), (24, 24));
+    }
+
+    #[test]
+    fn test_compact_key() {
+        // skip
+        if !(PIT == 6 && SEED == 4) {
+            return;
+        }
+
+        fn test(b: &Board) {
+            let k = compact_key(b);
+            let v = from_compact_key(k);
+            println!("{}\n{} {:?}", b, k, v);
+            for i in 0..6 {
+                assert_eq!(b.self_seeds()[i], v[i]);
+            }
+            for i in 0..6 {
+                assert_eq!(b.opposite_seed()[i], v[6 + i]);
+            }
+        }
+
+        let mut board = Board::new(false);
+        test(&board);
+        board.sow(2);
+        test(&board);
+        board.sow(5);
+        test(&board);
+        board.sow(1);
+        test(&board);
+        board.sow(3);
+        test(&board);
+        board.sow(4);
+        test(&board);
     }
 }
