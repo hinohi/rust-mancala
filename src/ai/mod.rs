@@ -52,6 +52,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
             let eval_args = args[1].split('-').collect::<Vec<_>>();
             Ok(match eval_args[0] {
                 "diff" => Box::new(InteractiveAI::new(ScoreDiffEvaluator::new(), max_depth)),
+                "pos" => Box::new(InteractiveAI::new(ScorePosEvaluator::new(), max_depth)),
                 "mc" => {
                     if eval_args.len() != 2 {
                         return Err("human:mc-(num):(max_depth)".to_string());
@@ -87,6 +88,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
             let eval_args = args[1].split('-').collect::<Vec<_>>();
             Ok(match eval_args[0] {
                 "diff" => Box::new(DepthSearchAI::new(ScoreDiffEvaluator::new(), max_depth)),
+                "pos" => Box::new(DepthSearchAI::new(ScorePosEvaluator::new(), max_depth)),
                 "mc" => {
                     if eval_args.len() != 2 {
                         return Err("dfs:mc-(num):(max_depth)".to_string());
