@@ -29,7 +29,7 @@ pub trait Evaluator {
     fn eval(&mut self, board: &Board) -> Self::Score;
 }
 
-pub trait Score: Ord + Copy + Debug {
+pub trait Score: PartialOrd + Copy + Debug {
     const MIN: Self;
     const MAX: Self;
     fn flip(&self) -> Self;

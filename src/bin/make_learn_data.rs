@@ -1,8 +1,7 @@
-use fnv::FnvHashMap;
 use rand::SeedableRng;
 use rand_pcg::Mcg128Xsl64;
 
-use mancala_rust::{from_compact_key, learn::*, MCTree, AI};
+use mancala_rust::{from_compact_key, learn::*, MCTree};
 
 fn main() {
     let stealing = true;
