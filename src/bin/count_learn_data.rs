@@ -16,10 +16,13 @@ fn main() {
     for pos in 0..12 {
         print!("[");
         for i in 0..32 {
-            if count[pos][i] == 0 {
+            if count[pos][i] < 100 {
                 print!("0.0, ");
             } else {
-                print!("{:.2}, ", score[pos][i] as f64 / count[pos][i] as f64);
+                print!(
+                    "{:.4}, ",
+                    score[pos][i] as f64 / count[pos][i] as f64 / 12.0
+                );
             }
         }
         println!("],");
