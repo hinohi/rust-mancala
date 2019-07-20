@@ -3,6 +3,7 @@ use std::io::{Read, Write};
 use fnv::FnvHashMap;
 
 use crate::board::{PIT, SEED};
+use crate::from_compact_key;
 
 pub fn db_name(stealing: bool) -> String {
     format!("p{}s{}_{}.dat", PIT, SEED, stealing)
@@ -60,4 +61,40 @@ pub fn save(stealing: bool, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result
         f.write_all(&mut [value.0 as u8, value.1])?;
     }
     Ok(())
+}
+
+pub fn iter_load(stealing: bool) -> std::io::Result<Load> {
+    let name = db_name(stealing);
+    let mut f = std::io::BufReader::new(std::fs::File::open(&name)?);
+    {
+        let mut buf = [0; 8];
+        f.read_exact(&mut buf)?
+    }
+    Ok(Load { f })
+}
+
+pub struct Load {
+    f: std::io::BufReader<std::fs::File>,
+}
+
+impl Iterator for Load {
+    type Item = ([u8; 12], i8, u8);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut buf = [0; 8];
+        let key = match self.f.read_exact(&mut buf) {
+            Err(_) => {
+                return None;
+            }
+            Ok(()) => u64::from_le_bytes(buf),
+        };
+        let mut buf = [0; 2];
+        let value = match self.f.read_exact(&mut buf) {
+            Err(_) => {
+                return None;
+            }
+            Ok(()) => (buf[0] as i8, buf[1]),
+        };
+        Some((from_compact_key(key), value.0, value.1))
+    }
 }
