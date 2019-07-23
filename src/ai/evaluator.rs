@@ -106,6 +106,70 @@ impl Evaluator for ScorePosEvaluator {
     }
 }
 
+lazy_static! {
+    static ref POS2_SCORE_MAP: [[[[f64; 32]; 12]; 32]; 12] = {
+        let mut score = [[[[0.0; 32]; 12]; 32]; 12];
+        let data = include_str!("pos2_score.txt");
+        let mut words = data.lines();
+        for p1 in 0..12 {
+            for s1 in 0..32 {
+                for p2 in 0..12 {
+                    for s2 in 0..32 {
+                        score[p1][s1][p2][s2] = words.next().unwrap().parse().unwrap();
+                    }
+                }
+            }
+        }
+        score
+    };
+}
+
+#[derive(Debug, Default)]
+pub struct ScorePos2Evaluator;
+
+impl ScorePos2Evaluator {
+    pub fn new() -> ScorePos2Evaluator {
+        ScorePos2Evaluator {}
+    }
+}
+
+impl Evaluator for ScorePos2Evaluator {
+    type Score = f64;
+    fn eval(&mut self, board: &Board) -> Self::Score {
+        if board.is_finished() {
+            let (s0, s1) = board.last_scores();
+            if board.side() == Side::First {
+                f64::from(s0) - f64::from(s1)
+            } else {
+                f64::from(s1) - f64::from(s0)
+            }
+        } else {
+            let mut score = 0.0;
+            let seeds = {
+                let mut seeds = [0; 12];
+                for (pos, seed) in board.self_seeds().iter().enumerate() {
+                    seeds[pos] = *seed as usize;
+                }
+                for (pos, seed) in board.opposite_seed().iter().enumerate() {
+                    seeds[pos + 6] = *seed as usize;
+                }
+                seeds
+            };
+            for (p1, s1) in seeds.iter().enumerate() {
+                for (p2, s2) in seeds.iter().enumerate() {
+                    score += POS2_SCORE_MAP[p1][*s1][p2][*s2];
+                }
+            }
+            let (s0, s1) = board.scores();
+            if board.side() == Side::First {
+                score + f64::from(s0) - f64::from(s1)
+            } else {
+                score + f64::from(s1) - f64::from(s0)
+            }
+        }
+    }
+}
+
 // -- WinRate
 
 #[derive(Debug, Copy, Clone, Default)]
