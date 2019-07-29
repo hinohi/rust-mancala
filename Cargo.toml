@@ -9,3 +9,6 @@ rand = "*"
 rand_pcg = "*"
 fnv = "*"
 lazy_static = "*"
+ndarray = { version = "*", features = ["serde-1"] }
+
+rust-nn = {version = "*", git = "https://github.com/hinohi/rust-nn" }
