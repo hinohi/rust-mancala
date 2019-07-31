@@ -4,13 +4,18 @@ use std::io::BufWriter;
 use ndarray::arr2;
 
 use mancala_rust::learn::iter_load;
-use rust_nn::train::{Layer, NN3Regression};
+use rust_nn::train::{AdaDelta, Layer, NN4Regression};
 use std::process::exit;
 
 fn main() {
     let stealing = true;
     let batch_size = 100;
-    let mut model = NN3Regression::new([12, 16, 16, 16], batch_size, 1e-4);
+    let mut model = NN4Regression::new(
+        [12, 64, 64, 64, 64],
+        batch_size,
+        AdaDelta::default(),
+        AdaDelta::default(),
+    );
 
     let mut x = Vec::new();
     let mut t = Vec::new();
@@ -42,8 +47,8 @@ fn main() {
             println!("{} {}", epoch, loss / 1000.0);
             loss = 0.0;
         }
-        if epoch % 10_000_000 == 0 {
-            let name = format!("model/NN3_16_{}.model", epoch);
+        if epoch % 1_000_000 == 0 {
+            let name = format!("model/NN4_{}.model", epoch);
             let mut f = BufWriter::new(File::create(name).unwrap());
             model.get_inner().encode(&mut f);
         }
