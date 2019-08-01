@@ -1,6 +1,9 @@
 use mancala_rust::learn::*;
 
-fn count_pos1(stealing: bool) -> ([[f64; 32]; 12], [[f64; 32]; 12]) {
+type Pos1Map = [[f64; 32]; 12];
+type Pos2Map = [[[[f64; 32]; 12]; 32]; 12];
+
+fn count_pos1(stealing: bool) -> (Pos1Map, Pos1Map) {
     let mut score = [[0.0; 32]; 12];
     let mut count = [[0.0; 32]; 12];
     for (seeds, s, _) in iter_load(stealing).unwrap() {
@@ -44,13 +47,13 @@ fn count_pos1_and_check(stealing: bool) {
         for (pos, &s) in seeds.iter().enumerate() {
             predict += map[pos][s as usize];
         }
-        error[depth as usize] += 0.5 * (exact as f64 - predict).powi(2);
+        error[depth as usize] += 0.5 * (f64::from(exact) - predict).powi(2);
         count[depth as usize] += 1.0;
     }
     print_error(&error, &count);
 }
 
-fn count_pos2(stealing: bool) -> ([[[[f64; 32]; 12]; 32]; 12], [[[[f64; 32]; 12]; 32]; 12]) {
+fn count_pos2(stealing: bool) -> (Pos2Map, Pos2Map) {
     let mut score = [[[[0.0; 32]; 12]; 32]; 12];
     let mut count = [[[[0.0; 32]; 12]; 32]; 12];
     for (seeds, s, _) in iter_load(stealing).unwrap() {
@@ -107,7 +110,7 @@ fn count_pos2_and_check(stealing: bool) {
                 predict += map[p1][s1 as usize][p2][s2 as usize];
             }
         }
-        error[depth as usize] += 0.5 * (exact as f64 - predict).powi(2);
+        error[depth as usize] += 0.5 * (f64::from(exact) - predict).powi(2);
         count[depth as usize] += 1.0;
     }
     print_error(&error, &count);
@@ -126,10 +129,10 @@ fn nn4_check(model: &str, stealing: bool) {
     let mut input = Array1::zeros(12);
     for (seeds, exact, depth) in iter_load(stealing).unwrap() {
         for (x, &s) in input.iter_mut().zip(seeds.iter()) {
-            *x = s as f64;
+            *x = f64::from(s);
         }
         let predict = nn.predict(&input);
-        error[depth as usize] += 0.5 * (exact as f64 - predict).powi(2);
+        error[depth as usize] += 0.5 * (f64::from(exact) - predict).powi(2);
         count[depth as usize] += 1.0;
     }
     print_error(&error, &count);
