@@ -18,6 +18,7 @@ use std::fmt::Debug;
 use rand::SeedableRng;
 use rand_pcg::{Mcg128Xsl64 as Rng, Mcg128Xsl64};
 
+use crate::ai::mctree::WeightedMCTree;
 use crate::board::Board;
 
 pub trait AI {
@@ -69,7 +70,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                     ))
                 }
                 _ => {
-                    return Err("human[:(diff|mc-(num)):(max_depth)]".to_string());
+                    return Err("human[:(diff|pos|pos2|nn|mc-(num)):(max_depth)]".to_string());
                 }
             })
         }
@@ -107,7 +108,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                     ))
                 }
                 _ => {
-                    return Err("dfs:(diff|mc-(num)):(max_depth)".to_string());
+                    return Err("dfs:(diff|pos|pos2|nn|mc-(num)):(max_depth)".to_string());
                 }
             })
         }
@@ -120,6 +121,40 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                 Err(e) => return Err(format!("mctree:(num) {}", e)),
             };
             Ok(Box::new(MCTree::new(num as usize, Rng::from_entropy())))
+        }
+        "weighted" => {
+            if args.len() != 3 {
+                return Err("weighted:(eval):(num)".to_string());
+            }
+            let num = match args[2].parse::<u32>() {
+                Ok(e) => 1_u32 << e,
+                Err(e) => return Err(format!("mctree:(num) {}", e)),
+            } as usize;
+            Ok(match args[1] {
+                "diff" => Box::new(WeightedMCTree::new(
+                    num,
+                    Rng::from_entropy(),
+                    ScoreDiffEvaluator::new(),
+                )),
+                "pos" => Box::new(WeightedMCTree::new(
+                    num,
+                    Rng::from_entropy(),
+                    ScorePosEvaluator::new(),
+                )),
+                "pos2" => Box::new(WeightedMCTree::new(
+                    num,
+                    Rng::from_entropy(),
+                    ScorePos2Evaluator::new(),
+                )),
+                "nn" => Box::new(WeightedMCTree::new(
+                    num,
+                    Rng::from_entropy(),
+                    NNEvaluator::new(),
+                )),
+                _ => {
+                    return Err("weighted:(diff|pos|pos2|nn):(num)".to_string());
+                }
+            })
         }
         "sparse" => {
             if args.len() != 3 {
@@ -145,6 +180,6 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
             }
             Ok(Box::new(GreedyAI::new(Mcg128Xsl64::from_entropy())))
         }
-        _ => Err("(human|random|dfs|mctree|sparse|greedy)".to_string()),
+        _ => Err("(human|random|dfs|mctree|weighted|sparse|greedy)".to_string()),
     }
 }

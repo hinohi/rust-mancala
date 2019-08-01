@@ -78,7 +78,7 @@ where
         let prob = {
             let mut prob = next_list
                 .iter()
-                .map(|board| eval.eval(board).into())
+                .map(|board| -eval.eval(board).into())
                 .collect::<Vec<_>>();
             soft_max(&mut prob);
             prob

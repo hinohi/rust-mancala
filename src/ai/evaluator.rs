@@ -2,7 +2,8 @@ use ndarray::Array1;
 use rand::Rng;
 use rust_nn::predict::NN4Regression;
 
-use super::{utils::random_down, Evaluator, Score};
+use super::utils::{random_down, random_down_with_weight};
+use super::{Evaluator, Score};
 use crate::board::{Board, Side};
 
 impl Score for i32 {
@@ -285,6 +286,45 @@ impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
         let mut score = Self::Score::default();
         for _ in 0..self.num {
             let (s0, s1) = random_down(&mut self.random, board.clone()).last_scores();
+            score.count(if board.side() == Side::First {
+                i32::from(s0) - i32::from(s1)
+            } else {
+                i32::from(s1) - i32::from(s0)
+            });
+        }
+        score
+    }
+}
+
+#[derive(Debug)]
+pub struct WeightedMCTreeEvaluator<R, E> {
+    random: R,
+    eval: E,
+    num: usize,
+}
+
+impl<R, E> WeightedMCTreeEvaluator<R, E> {
+    pub fn new(random: R, eval: E, num: usize) -> Self {
+        WeightedMCTreeEvaluator { random, eval, num }
+    }
+
+    pub fn set_num(&mut self, num: usize) {
+        self.num = num;
+    }
+}
+
+impl<R, E> Evaluator for WeightedMCTreeEvaluator<R, E>
+where
+    R: Rng,
+    E: Evaluator,
+    E::Score: Into<f64>,
+{
+    type Score = WinRateScore;
+    fn eval(&mut self, board: &Board) -> Self::Score {
+        let mut score = Self::Score::default();
+        for _ in 0..self.num {
+            let (s0, s1) = random_down_with_weight(&mut self.random, &mut self.eval, board.clone())
+                .last_scores();
             score.count(if board.side() == Side::First {
                 i32::from(s0) - i32::from(s1)
             } else {
