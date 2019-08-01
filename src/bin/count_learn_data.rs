@@ -113,6 +113,28 @@ fn count_pos2_and_check(stealing: bool) {
     print_error(&error, &count);
 }
 
+fn nn4_check(model: &str, stealing: bool) {
+    use ndarray::Array1;
+    use rust_nn::predict::NN4Regression;
+    use std::fs::File;
+    use std::io::BufReader;
+
+    let mut f = BufReader::new(File::open(model).unwrap());
+    let mut nn = NN4Regression::new(&mut f);
+    let mut error = [0.0; 40];
+    let mut count = [0.0; 40];
+    let mut input = Array1::zeros(12);
+    for (seeds, exact, depth) in iter_load(stealing).unwrap() {
+        for (x, &s) in input.iter_mut().zip(seeds.iter()) {
+            *x = s as f64;
+        }
+        let predict = nn.predict(&input);
+        error[depth as usize] += 0.5 * (exact as f64 - predict).powi(2);
+        count[depth as usize] += 1.0;
+    }
+    print_error(&error, &count);
+}
+
 fn print_error(error: &[f64], count: &[f64]) {
     let mut te = 0.0;
     let mut tc = 0.0;
@@ -134,6 +156,7 @@ fn main() {
         Some("pos2_show") => count_pos2_and_show(stealing),
         Some("pos1_check") => count_pos1_and_check(stealing),
         Some("pos2_check") => count_pos2_and_check(stealing),
-        _ => eprintln!("Usage: (pos1|pos2)_(check|show)"),
+        Some("nn4") => nn4_check(&args[2], stealing),
+        _ => eprintln!("Usage: (pos1|pos2)_(check|show)|nn4"),
     }
 }
