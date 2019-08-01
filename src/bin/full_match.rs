@@ -4,12 +4,13 @@ use mancala_rust::*;
 
 fn main() {
     let list = [
-        "dfs:pos:3",
-        "dfs:pos:5",
-        "dfs:pos:7",
+        "dfs:nn:5",
+        "weighted:diff:10",
+        "weighted:pos:10",
+        "weighted:nn:10",
         "random",
-        "greedy",
         "dfs:diff:9",
+        "dfs:pos:7",
         "mctree:12",
     ];
     let args = args().collect::<Vec<_>>();
