@@ -1,4 +1,6 @@
+use ndarray::Array1;
 use rand::Rng;
+use rust_nn::predict::NN4Regression;
 
 use super::{utils::random_down, Evaluator, Score};
 use crate::board::{Board, Side};
@@ -290,5 +292,53 @@ impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
             });
         }
         score
+    }
+}
+
+// -- Neural Network base
+
+static NN4_MODEL: &[u8] = include_bytes!("NN4_64.model");
+
+#[derive(Debug)]
+pub struct NNEvaluator {
+    nn: NN4Regression,
+    input: Array1<rust_nn::Float>,
+}
+
+impl NNEvaluator {
+    pub fn new() -> NNEvaluator {
+        NNEvaluator {
+            nn: NN4Regression::new(&mut std::io::BufReader::new(NN4_MODEL)),
+            input: Array1::zeros(12),
+        }
+    }
+}
+impl Evaluator for NNEvaluator {
+    type Score = rust_nn::Float;
+    fn eval(&mut self, board: &Board) -> Self::Score {
+        use rust_nn::Float;
+
+        if board.is_finished() {
+            let (s0, s1) = board.last_scores();
+            if board.side() == Side::First {
+                Float::from(s0) - Float::from(s1)
+            } else {
+                Float::from(s1) - Float::from(s0)
+            }
+        } else {
+            for (pos, &s) in board.self_seeds().iter().enumerate() {
+                self.input[pos] = Float::from(s);
+            }
+            for (pos, &s) in board.opposite_seed().iter().enumerate() {
+                self.input[pos + 6] = Float::from(s);
+            }
+            let (s0, s1) = board.scores();
+            self.nn.predict(&self.input)
+                + if board.side() == Side::First {
+                    Float::from(s0) - Float::from(s1)
+                } else {
+                    Float::from(s1) - Float::from(s0)
+                }
+        }
     }
 }
