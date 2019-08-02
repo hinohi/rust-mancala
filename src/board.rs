@@ -113,8 +113,26 @@ impl Board {
         )
     }
 
+    pub fn last_score(&self) -> i8 {
+        let (s0, s1) = self.last_scores();
+        if self.side == Side::First {
+            s0 as i8 - s1 as i8
+        } else {
+            s1 as i8 - s0 as i8
+        }
+    }
+
     pub fn scores(&self) -> (u8, u8) {
         (self.score[0], self.score[1])
+    }
+
+    pub fn score(&self) -> i8 {
+        let (s0, s1) = self.scores();
+        if self.side == Side::First {
+            s0 as i8 - s1 as i8
+        } else {
+            s1 as i8 - s0 as i8
+        }
     }
 
     pub fn is_finished(&self) -> bool {
