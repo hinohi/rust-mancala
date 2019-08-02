@@ -161,5 +161,4 @@ mod tests {
         let board = random_down_with_weight(&mut random, &mut eval, Board::new(false));
         assert!(board.is_finished());
     }
-
 }

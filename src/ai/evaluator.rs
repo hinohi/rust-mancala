@@ -4,7 +4,7 @@ use rust_nn::predict::NN4Regression;
 
 use super::utils::{random_down, random_down_with_weight};
 use super::{Evaluator, Score};
-use crate::board::{Board, Side};
+use crate::board::Board;
 
 impl Score for i32 {
     const MIN: Self = std::i32::MIN + 1;
@@ -47,12 +47,7 @@ impl ScoreDiffEvaluator {
 impl Evaluator for ScoreDiffEvaluator {
     type Score = i32;
     fn eval(&mut self, board: &Board) -> Self::Score {
-        let (s0, s1) = board.last_scores();
-        if board.side() == Side::First {
-            i32::from(s0) - i32::from(s1)
-        } else {
-            i32::from(s1) - i32::from(s0)
-        }
+        i32::from(board.last_score())
     }
 }
 
@@ -85,12 +80,7 @@ impl Evaluator for ScorePosEvaluator {
     type Score = f64;
     fn eval(&mut self, board: &Board) -> Self::Score {
         if board.is_finished() {
-            let (s0, s1) = board.last_scores();
-            if board.side() == Side::First {
-                f64::from(s0) - f64::from(s1)
-            } else {
-                f64::from(s1) - f64::from(s0)
-            }
+            f64::from(board.last_score())
         } else {
             let mut score = 0.0;
             for (pos, seed) in board.self_seeds().iter().enumerate() {
@@ -99,12 +89,7 @@ impl Evaluator for ScorePosEvaluator {
             for (pos, seed) in board.opposite_seed().iter().enumerate() {
                 score += POS1_SCORE_MAP[pos + 6][*seed as usize]
             }
-            let (s0, s1) = board.scores();
-            if board.side() == Side::First {
-                score + f64::from(s0) - f64::from(s1)
-            } else {
-                score + f64::from(s1) - f64::from(s0)
-            }
+            score + f64::from(board.score())
         }
     }
 }
@@ -140,12 +125,7 @@ impl Evaluator for ScorePos2Evaluator {
     type Score = f64;
     fn eval(&mut self, board: &Board) -> Self::Score {
         if board.is_finished() {
-            let (s0, s1) = board.last_scores();
-            if board.side() == Side::First {
-                f64::from(s0) - f64::from(s1)
-            } else {
-                f64::from(s1) - f64::from(s0)
-            }
+            f64::from(board.last_score())
         } else {
             let mut score = 0.0;
             let seeds = {
@@ -163,12 +143,7 @@ impl Evaluator for ScorePos2Evaluator {
                     score += POS2_SCORE_MAP[p1][*s1][p2][*s2];
                 }
             }
-            let (s0, s1) = board.scores();
-            if board.side() == Side::First {
-                score + f64::from(s0) - f64::from(s1)
-            } else {
-                score + f64::from(s1) - f64::from(s0)
-            }
+            score + f64::from(board.score())
         }
     }
 }
@@ -285,12 +260,8 @@ impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
     fn eval(&mut self, board: &Board) -> Self::Score {
         let mut score = Self::Score::default();
         for _ in 0..self.num {
-            let (s0, s1) = random_down(&mut self.random, board.clone()).last_scores();
-            score.count(if board.side() == Side::First {
-                i32::from(s0) - i32::from(s1)
-            } else {
-                i32::from(s1) - i32::from(s0)
-            });
+            let s = random_down(&mut self.random, board.clone()).last_score();
+            score.count(i32::from(s));
         }
         score
     }
@@ -323,13 +294,9 @@ where
     fn eval(&mut self, board: &Board) -> Self::Score {
         let mut score = Self::Score::default();
         for _ in 0..self.num {
-            let (s0, s1) = random_down_with_weight(&mut self.random, &mut self.eval, board.clone())
-                .last_scores();
-            score.count(if board.side() == Side::First {
-                i32::from(s0) - i32::from(s1)
-            } else {
-                i32::from(s1) - i32::from(s0)
-            });
+            let s = random_down_with_weight(&mut self.random, &mut self.eval, board.clone())
+                .last_score();
+            score.count(i32::from(s));
         }
         score
     }
@@ -359,12 +326,7 @@ impl Evaluator for NNEvaluator {
         use rust_nn::Float;
 
         if board.is_finished() {
-            let (s0, s1) = board.last_scores();
-            if board.side() == Side::First {
-                Float::from(s0) - Float::from(s1)
-            } else {
-                Float::from(s1) - Float::from(s0)
-            }
+            Float::from(board.last_score())
         } else {
             for (pos, &s) in board.self_seeds().iter().enumerate() {
                 self.input[pos] = Float::from(s);
@@ -372,13 +334,7 @@ impl Evaluator for NNEvaluator {
             for (pos, &s) in board.opposite_seed().iter().enumerate() {
                 self.input[pos + 6] = Float::from(s);
             }
-            let (s0, s1) = board.scores();
-            self.nn.predict(&self.input)
-                + if board.side() == Side::First {
-                    Float::from(s0) - Float::from(s1)
-                } else {
-                    Float::from(s1) - Float::from(s0)
-                }
+            self.nn.predict(&self.input) + Float::from(board.score())
         }
     }
 }

@@ -2,15 +2,10 @@ use fnv::FnvHashMap;
 use rand::Rng;
 
 use crate::ai::{MCTree, AI};
-use crate::board::{compact_key, Board, Side};
+use crate::board::{compact_key, Board};
 
 fn raw_scores(board: &Board) -> i8 {
-    let (s0, s1) = board.scores();
-    if board.side() == Side::First {
-        s0 as i8 - s1 as i8
-    } else {
-        s1 as i8 - s0 as i8
-    }
+    board.score()
 }
 
 fn seed_scores(board: &Board) -> i8 {

@@ -2,7 +2,7 @@ use fnv::{FnvHashMap, FnvHashSet};
 use rand::Rng;
 
 use super::AI;
-use crate::board::{Board, Side};
+use crate::board::Board;
 
 pub struct SparseDepthSearchAI<R> {
     first_depth: usize,
@@ -79,12 +79,7 @@ where
             _ => unreachable!(),
         };
         if next_list.is_empty() {
-            let (s0, s1) = board.last_scores();
-            return if board.side() == Side::First {
-                i32::from(s0) - i32::from(s1)
-            } else {
-                i32::from(s1) - i32::from(s0)
-            };
+            return i32::from(board.last_score());
         }
         let mut best = std::i32::MIN;
         for nex in next_list {

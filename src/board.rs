@@ -113,8 +113,26 @@ impl Board {
         )
     }
 
+    pub fn last_score(&self) -> i8 {
+        let (s0, s1) = self.last_scores();
+        if self.side == Side::First {
+            s0 as i8 - s1 as i8
+        } else {
+            s1 as i8 - s0 as i8
+        }
+    }
+
     pub fn scores(&self) -> (u8, u8) {
         (self.score[0], self.score[1])
+    }
+
+    pub fn score(&self) -> i8 {
+        let (s0, s1) = self.scores();
+        if self.side == Side::First {
+            s0 as i8 - s1 as i8
+        } else {
+            s1 as i8 - s0 as i8
+        }
     }
 
     pub fn is_finished(&self) -> bool {
@@ -371,5 +389,22 @@ mod tests {
         test(&board);
         board.sow(4);
         test(&board);
+    }
+
+    #[test]
+    fn test_score() {
+        // skip
+        if !(PIT == 6 && SEED == 4) {
+            return;
+        }
+        let mut board = Board::new(true);
+        assert_eq!(board.score(), 0);
+        assert_eq!(board.last_score(), 0);
+        board.sow(2);
+        assert_eq!(board.score(), 1);
+        assert_eq!(board.last_score(), 0);
+        board.sow(5);
+        assert_eq!(board.score(), -2);
+        assert_eq!(board.last_score(), (5 - 1) * 2);
     }
 }
