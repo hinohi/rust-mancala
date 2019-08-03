@@ -4,9 +4,8 @@ use std::io::{BufReader, BufWriter};
 use ndarray::{arr2, Array2};
 
 use mancala_rust::learn::iter_load;
-use rust_nn::train::{Adam, NN6Regression};
+use rust_nn::train::*;
 use rust_nn::Float;
-use std::process::exit;
 
 fn gen_case<I>(x: &mut Array2<Float>, t: &mut Array2<Float>, data: &mut I) -> bool
 where
@@ -30,15 +29,20 @@ fn main() {
     let stealing = true;
     let batch_size = 128;
     let mut model = match args.get(0) {
-        None => NN6Regression::new(
-            [12, 128, 128, 128, 128, 128, 128],
+        None => NN4Regression::new(
+            [12, 64, 64, 64, 64],
             batch_size,
-            Adam::default(),
-            Adam::default(),
+            SGD::default().learning_rate(1e-4),
+            SGD::default().learning_rate(1e-4),
         ),
         Some(path) => {
             let mut f = BufReader::new(File::open(path).unwrap());
-            NN6Regression::decode(&mut f, batch_size, Adam::default(), Adam::default())
+            NN4Regression::decode(
+                &mut f,
+                batch_size,
+                SGD::default().learning_rate(1e-4),
+                SGD::default().learning_rate(1e-4),
+            )
         }
     };
 
@@ -65,7 +69,7 @@ fn main() {
                 loss = 0.0;
             }
             if epoch % 100_000 == 0 {
-                let name = format!("model/NN6_{}.model", epoch);
+                let name = format!("model/NN4_SGD_{}.model", epoch);
                 let mut f = BufWriter::new(File::create(name).unwrap());
                 model.encode(&mut f);
             }
