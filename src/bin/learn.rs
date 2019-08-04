@@ -28,20 +28,25 @@ fn main() {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     let stealing = true;
     let batch_size = 128;
-    let mut model = match args.get(0) {
+    let pow2 = match args.get(0) {
+        Some(n) => n.parse::<i32>().unwrap(),
+        None => 13, // 1.220703125e-4
+    };
+    let lr = 2f64.powi(-pow2);
+    let mut model = match args.get(1) {
         None => NN4Regression::new(
             [12, 64, 64, 64, 64],
             batch_size,
-            SGD::default().learning_rate(1e-4),
-            SGD::default().learning_rate(1e-4),
+            SGD::default().learning_rate(lr),
+            SGD::default().learning_rate(lr),
         ),
         Some(path) => {
             let mut f = BufReader::new(File::open(path).unwrap());
             NN4Regression::decode(
                 &mut f,
                 batch_size,
-                SGD::default().learning_rate(1e-4),
-                SGD::default().learning_rate(1e-4),
+                SGD::default().learning_rate(lr),
+                SGD::default().learning_rate(lr),
             )
         }
     };
@@ -69,7 +74,7 @@ fn main() {
                 loss = 0.0;
             }
             if epoch % 100_000 == 0 {
-                let name = format!("model/NN4_SGD_{}.model", epoch);
+                let name = format!("model/NN4_{}_{}.model", pow2, epoch);
                 let mut f = BufWriter::new(File::create(name).unwrap());
                 model.encode(&mut f);
             }
