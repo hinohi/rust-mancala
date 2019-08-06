@@ -1,6 +1,6 @@
 use ndarray::Array1;
 use rand::Rng;
-use rust_nn::predict::NN4Regression;
+use rust_nn::predict::{NN4Regression, NN6Regression};
 
 use super::utils::{random_down, random_down_with_weight};
 use super::{Evaluator, Score};
@@ -250,7 +250,9 @@ where
 
 // -- Neural Network base
 
-static NN4_MODEL: &[u8] = include_bytes!("NN4_true.model");
+static NN4_TRUE_MODEL: &[u8] = include_bytes!("NN4_true.model");
+static NN6_TRUE_MODEL: &[u8] = include_bytes!("NN6_true.model");
+static NN6_FALSE_MODEL: &[u8] = include_bytes!("NN6_false.model");
 
 #[derive(Debug)]
 pub struct NN4Evaluator {
@@ -261,13 +263,54 @@ pub struct NN4Evaluator {
 impl NN4Evaluator {
     pub fn new(stealing: bool) -> NN4Evaluator {
         assert!(stealing);
+        let mut model = NN4_TRUE_MODEL;
         NN4Evaluator {
-            nn: NN4Regression::new(&mut std::io::BufReader::new(NN4_MODEL)),
+            nn: NN4Regression::new(&mut model),
             input: Array1::zeros(12),
         }
     }
 }
+
 impl Evaluator for NN4Evaluator {
+    type Score = rust_nn::Float;
+    fn eval(&mut self, board: &Board) -> Self::Score {
+        use rust_nn::Float;
+
+        if board.is_finished() {
+            Float::from(board.last_score())
+        } else {
+            for (pos, &s) in board.self_seeds().iter().enumerate() {
+                self.input[pos] = Float::from(s);
+            }
+            for (pos, &s) in board.opposite_seed().iter().enumerate() {
+                self.input[pos + 6] = Float::from(s);
+            }
+            self.nn.predict(&self.input) + Float::from(board.score())
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct NN6Evaluator {
+    nn: NN6Regression,
+    input: Array1<rust_nn::Float>,
+}
+
+impl NN6Evaluator {
+    pub fn new(stealing: bool) -> NN6Evaluator {
+        let mut model = if stealing {
+            NN6_TRUE_MODEL
+        } else {
+            NN6_FALSE_MODEL
+        };
+        NN6Evaluator {
+            nn: NN6Regression::new(&mut model),
+            input: Array1::zeros(12),
+        }
+    }
+}
+
+impl Evaluator for NN6Evaluator {
     type Score = rust_nn::Float;
     fn eval(&mut self, board: &Board) -> Self::Score {
         use rust_nn::Float;

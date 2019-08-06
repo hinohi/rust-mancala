@@ -55,6 +55,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                 "diff" => Box::new(InteractiveAI::new(ScoreDiffEvaluator::new(), max_depth)),
                 "pos" => Box::new(InteractiveAI::new(ScorePosEvaluator::new(), max_depth)),
                 "nn4" => Box::new(InteractiveAI::new(NN4Evaluator::new(stealing), max_depth)),
+                "nn6" => Box::new(InteractiveAI::new(NN6Evaluator::new(stealing), max_depth)),
                 "mc" => {
                     if eval_args.len() != 2 {
                         return Err("human:mc-(num):(max_depth)".to_string());
@@ -69,7 +70,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                     ))
                 }
                 _ => {
-                    return Err("human[:(diff|pos|nn4|mc-(num)):(max_depth)]".to_string());
+                    return Err("human[:(diff|pos|nn4|nn6|mc-(num)):(max_depth)]".to_string());
                 }
             })
         }
@@ -92,6 +93,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                 "diff" => Box::new(DepthSearchAI::new(ScoreDiffEvaluator::new(), max_depth)),
                 "pos" => Box::new(DepthSearchAI::new(ScorePosEvaluator::new(), max_depth)),
                 "nn4" => Box::new(DepthSearchAI::new(NN4Evaluator::new(stealing), max_depth)),
+                "nn6" => Box::new(DepthSearchAI::new(NN6Evaluator::new(stealing), max_depth)),
                 "mc" => {
                     if eval_args.len() != 2 {
                         return Err("dfs:mc-(num):(max_depth)".to_string());
@@ -106,7 +108,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                     ))
                 }
                 _ => {
-                    return Err("dfs:(diff|pos|nn4|mc-(num)):(max_depth)".to_string());
+                    return Err("dfs:(diff|pos|nn4|nn6|mc-(num)):(max_depth)".to_string());
                 }
             })
         }
@@ -144,8 +146,13 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                     Rng::from_entropy(),
                     NN4Evaluator::new(stealing),
                 )),
+                "nn6" => Box::new(WeightedMCTree::new(
+                    num,
+                    Rng::from_entropy(),
+                    NN6Evaluator::new(stealing),
+                )),
                 _ => {
-                    return Err("weighted:(diff|pos|nn4):(num)".to_string());
+                    return Err("weighted:(diff|pos|nn4|nn6):(num)".to_string());
                 }
             })
         }
