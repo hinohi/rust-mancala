@@ -54,7 +54,6 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
             Ok(match eval_args[0] {
                 "diff" => Box::new(InteractiveAI::new(ScoreDiffEvaluator::new(), max_depth)),
                 "pos" => Box::new(InteractiveAI::new(ScorePosEvaluator::new(), max_depth)),
-                "pos2" => Box::new(InteractiveAI::new(ScorePos2Evaluator::new(), max_depth)),
                 "nn" => Box::new(InteractiveAI::new(NNEvaluator::new(), max_depth)),
                 "mc" => {
                     if eval_args.len() != 2 {
@@ -70,7 +69,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                     ))
                 }
                 _ => {
-                    return Err("human[:(diff|pos|pos2|nn|mc-(num)):(max_depth)]".to_string());
+                    return Err("human[:(diff|pos|nn|mc-(num)):(max_depth)]".to_string());
                 }
             })
         }
@@ -92,7 +91,6 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
             Ok(match eval_args[0] {
                 "diff" => Box::new(DepthSearchAI::new(ScoreDiffEvaluator::new(), max_depth)),
                 "pos" => Box::new(DepthSearchAI::new(ScorePosEvaluator::new(), max_depth)),
-                "pos2" => Box::new(DepthSearchAI::new(ScorePos2Evaluator::new(), max_depth)),
                 "nn" => Box::new(DepthSearchAI::new(NNEvaluator::new(), max_depth)),
                 "mc" => {
                     if eval_args.len() != 2 {
@@ -108,7 +106,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                     ))
                 }
                 _ => {
-                    return Err("dfs:(diff|pos|pos2|nn|mc-(num)):(max_depth)".to_string());
+                    return Err("dfs:(diff|pos|nn|mc-(num)):(max_depth)".to_string());
                 }
             })
         }
@@ -141,18 +139,13 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                     Rng::from_entropy(),
                     ScorePosEvaluator::new(),
                 )),
-                "pos2" => Box::new(WeightedMCTree::new(
-                    num,
-                    Rng::from_entropy(),
-                    ScorePos2Evaluator::new(),
-                )),
                 "nn" => Box::new(WeightedMCTree::new(
                     num,
                     Rng::from_entropy(),
                     NNEvaluator::new(),
                 )),
                 _ => {
-                    return Err("weighted:(diff|pos|pos2|nn):(num)".to_string());
+                    return Err("weighted:(diff|pos|nn):(num)".to_string());
                 }
             })
         }
