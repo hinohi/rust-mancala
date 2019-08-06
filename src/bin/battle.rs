@@ -16,14 +16,14 @@ fn main() {
             exit(1);
         }
     };
-    let a = match build_ai(&args[2]) {
+    let a = match build_ai(stealing, &args[2]) {
         Ok(ai) => ai,
         Err(e) => {
             eprintln!("Usage: {}", e);
             exit(1);
         }
     };
-    let b = match build_ai(&args[3]) {
+    let b = match build_ai(stealing, &args[3]) {
         Ok(ai) => ai,
         Err(e) => {
             eprintln!("Usage: {}", e);

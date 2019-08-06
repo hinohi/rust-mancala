@@ -4,10 +4,10 @@ use mancala_rust::*;
 
 fn main() {
     let list = [
-        "dfs:nn:5",
+        "dfs:nn4:5",
         "weighted:diff:10",
         "weighted:pos:10",
-        "weighted:nn:10",
+        "weighted:nn4:10",
         "random",
         "dfs:diff:9",
         "dfs:pos:7",
@@ -18,7 +18,11 @@ fn main() {
     loop {
         for &a in list.iter() {
             for &b in list.iter() {
-                let mut game = Game::new(stealing, build_ai(a).unwrap(), build_ai(b).unwrap());
+                let mut game = Game::new(
+                    stealing,
+                    build_ai(stealing, a).unwrap(),
+                    build_ai(stealing, b).unwrap(),
+                );
                 let (sa, sb) = game.run();
                 println!("{} {} {} {}", a, b, sa, sb);
             }

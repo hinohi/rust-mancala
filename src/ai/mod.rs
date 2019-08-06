@@ -36,7 +36,7 @@ pub trait Score: PartialOrd + Copy + Debug {
     fn flip(&self) -> Self;
 }
 
-pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
+pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
     let args = s.split(':').collect::<Vec<_>>();
     match args[0] {
         "human" => {
@@ -54,7 +54,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
             Ok(match eval_args[0] {
                 "diff" => Box::new(InteractiveAI::new(ScoreDiffEvaluator::new(), max_depth)),
                 "pos" => Box::new(InteractiveAI::new(ScorePosEvaluator::new(), max_depth)),
-                "nn" => Box::new(InteractiveAI::new(NNEvaluator::new(), max_depth)),
+                "nn4" => Box::new(InteractiveAI::new(NN4Evaluator::new(stealing), max_depth)),
                 "mc" => {
                     if eval_args.len() != 2 {
                         return Err("human:mc-(num):(max_depth)".to_string());
@@ -69,7 +69,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                     ))
                 }
                 _ => {
-                    return Err("human[:(diff|pos|nn|mc-(num)):(max_depth)]".to_string());
+                    return Err("human[:(diff|pos|nn4|mc-(num)):(max_depth)]".to_string());
                 }
             })
         }
@@ -91,7 +91,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
             Ok(match eval_args[0] {
                 "diff" => Box::new(DepthSearchAI::new(ScoreDiffEvaluator::new(), max_depth)),
                 "pos" => Box::new(DepthSearchAI::new(ScorePosEvaluator::new(), max_depth)),
-                "nn" => Box::new(DepthSearchAI::new(NNEvaluator::new(), max_depth)),
+                "nn4" => Box::new(DepthSearchAI::new(NN4Evaluator::new(stealing), max_depth)),
                 "mc" => {
                     if eval_args.len() != 2 {
                         return Err("dfs:mc-(num):(max_depth)".to_string());
@@ -106,7 +106,7 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                     ))
                 }
                 _ => {
-                    return Err("dfs:(diff|pos|nn|mc-(num)):(max_depth)".to_string());
+                    return Err("dfs:(diff|pos|nn4|mc-(num)):(max_depth)".to_string());
                 }
             })
         }
@@ -139,13 +139,13 @@ pub fn build_ai(s: &str) -> Result<Box<dyn AI>, String> {
                     Rng::from_entropy(),
                     ScorePosEvaluator::new(),
                 )),
-                "nn" => Box::new(WeightedMCTree::new(
+                "nn4" => Box::new(WeightedMCTree::new(
                     num,
                     Rng::from_entropy(),
-                    NNEvaluator::new(),
+                    NN4Evaluator::new(stealing),
                 )),
                 _ => {
-                    return Err("weighted:(diff|pos|nn):(num)".to_string());
+                    return Err("weighted:(diff|pos|nn4):(num)".to_string());
                 }
             })
         }

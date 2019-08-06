@@ -250,23 +250,24 @@ where
 
 // -- Neural Network base
 
-static NN4_MODEL: &[u8] = include_bytes!("NN4_64.model");
+static NN4_MODEL: &[u8] = include_bytes!("NN4_true.model");
 
 #[derive(Debug)]
-pub struct NNEvaluator {
+pub struct NN4Evaluator {
     nn: NN4Regression,
     input: Array1<rust_nn::Float>,
 }
 
-impl NNEvaluator {
-    pub fn new() -> NNEvaluator {
-        NNEvaluator {
+impl NN4Evaluator {
+    pub fn new(stealing: bool) -> NN4Evaluator {
+        assert!(stealing);
+        NN4Evaluator {
             nn: NN4Regression::new(&mut std::io::BufReader::new(NN4_MODEL)),
             input: Array1::zeros(12),
         }
     }
 }
-impl Evaluator for NNEvaluator {
+impl Evaluator for NN4Evaluator {
     type Score = rust_nn::Float;
     fn eval(&mut self, board: &Board) -> Self::Score {
         use rust_nn::Float;
