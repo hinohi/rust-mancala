@@ -251,6 +251,7 @@ where
 // -- Neural Network base
 
 static NN4_TRUE_MODEL: &[u8] = include_bytes!("NN4_true.model");
+static NN4_FALSE_MODEL: &[u8] = include_bytes!("NN4_false.model");
 static NN6_TRUE_MODEL: &[u8] = include_bytes!("NN6_true.model");
 static NN6_FALSE_MODEL: &[u8] = include_bytes!("NN6_false.model");
 
@@ -283,8 +284,11 @@ pub struct NN4Evaluator {
 
 impl NN4Evaluator {
     pub fn new(stealing: bool) -> NN4Evaluator {
-        assert!(stealing);
-        let mut model = NN4_TRUE_MODEL;
+        let mut model = if stealing {
+            NN4_TRUE_MODEL
+        } else {
+            NN4_FALSE_MODEL
+        };
         NN4Evaluator {
             nn: NN4Regression::new(&mut model),
             input: Array1::zeros(12),
