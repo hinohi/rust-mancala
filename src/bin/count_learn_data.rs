@@ -54,7 +54,7 @@ fn count_pos1_and_check(stealing: bool) {
 
 fn nn4_check(model: &str, stealing: bool) {
     use ndarray::Array1;
-    use rust_nn::predict::NN4Regression;
+    use rust_nn::predict::{NN4Regression, Regression};
     use std::fs::File;
     use std::io::BufReader;
 

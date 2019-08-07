@@ -1,6 +1,6 @@
 use ndarray::Array1;
 use rand::Rng;
-use rust_nn::predict::{NN4Regression, NN6Regression};
+use rust_nn::predict::{NN4Regression, NN6Regression, Regression};
 
 use super::utils::{random_down, random_down_with_weight};
 use super::{Evaluator, Score};
@@ -254,6 +254,27 @@ static NN4_TRUE_MODEL: &[u8] = include_bytes!("NN4_true.model");
 static NN6_TRUE_MODEL: &[u8] = include_bytes!("NN6_true.model");
 static NN6_FALSE_MODEL: &[u8] = include_bytes!("NN6_false.model");
 
+#[inline]
+fn nn_eval<R: Regression>(
+    nn: &mut R,
+    input: &mut Array1<rust_nn::Float>,
+    board: &Board,
+) -> rust_nn::Float {
+    use rust_nn::Float;
+
+    if board.is_finished() {
+        Float::from(board.last_score())
+    } else {
+        for (pos, &s) in board.self_seeds().iter().enumerate() {
+            input[pos] = Float::from(s);
+        }
+        for (pos, &s) in board.opposite_seed().iter().enumerate() {
+            input[pos + 6] = Float::from(s);
+        }
+        nn.predict(input) + Float::from(board.score())
+    }
+}
+
 #[derive(Debug)]
 pub struct NN4Evaluator {
     nn: NN4Regression,
@@ -274,19 +295,7 @@ impl NN4Evaluator {
 impl Evaluator for NN4Evaluator {
     type Score = rust_nn::Float;
     fn eval(&mut self, board: &Board) -> Self::Score {
-        use rust_nn::Float;
-
-        if board.is_finished() {
-            Float::from(board.last_score())
-        } else {
-            for (pos, &s) in board.self_seeds().iter().enumerate() {
-                self.input[pos] = Float::from(s);
-            }
-            for (pos, &s) in board.opposite_seed().iter().enumerate() {
-                self.input[pos + 6] = Float::from(s);
-            }
-            self.nn.predict(&self.input) + Float::from(board.score())
-        }
+        nn_eval(&mut self.nn, &mut self.input, board)
     }
 }
 
@@ -313,18 +322,6 @@ impl NN6Evaluator {
 impl Evaluator for NN6Evaluator {
     type Score = rust_nn::Float;
     fn eval(&mut self, board: &Board) -> Self::Score {
-        use rust_nn::Float;
-
-        if board.is_finished() {
-            Float::from(board.last_score())
-        } else {
-            for (pos, &s) in board.self_seeds().iter().enumerate() {
-                self.input[pos] = Float::from(s);
-            }
-            for (pos, &s) in board.opposite_seed().iter().enumerate() {
-                self.input[pos + 6] = Float::from(s);
-            }
-            self.nn.predict(&self.input) + Float::from(board.score())
-        }
+        nn_eval(&mut self.nn, &mut self.input, board)
     }
 }
