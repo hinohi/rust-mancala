@@ -62,7 +62,7 @@ pub fn just_load(stealing: bool) -> FnvHashMap<u64, i8> {
     };
 
     let mut data = FnvHashMap::with_capacity_and_hasher(n, Default::default());
-    for i in 0..n {
+    for _ in 0..n {
         let mut buf = [0; 8];
         f.read_exact(&mut buf).unwrap();
         let key = u64::from_le_bytes(buf);

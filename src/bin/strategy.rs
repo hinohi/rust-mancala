@@ -6,7 +6,7 @@ use mancala_rust::{compact_key, learn::*, Board, Evaluator, NN6Evaluator};
 const STEALING: bool = true;
 
 lazy_static! {
-    static ref SCORE_MAP: FnvHashMap<u64, (i8, u8)> = just_load(STEALING);
+    static ref SCORE_MAP: FnvHashMap<u64, i8> = just_load(STEALING);
 }
 
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
@@ -22,7 +22,7 @@ impl std::cmp::Ord for F {
 
 fn search(board: &Board, eval: &mut NN6Evaluator, depth: u8, alpha: f64, beta: f64) -> (f64, bool) {
     let key = compact_key(&board);
-    if let Some((s, _)) = SCORE_MAP.get(&key) {
+    if let Some(s) = SCORE_MAP.get(&key) {
         return (f64::from(board.score() + *s), true);
     }
     if board.is_finished() {
