@@ -52,6 +52,29 @@ pub fn load(stealing: bool) -> FnvHashMap<u64, (i8, u8)> {
     data
 }
 
+pub fn just_load(stealing: bool) -> FnvHashMap<u64, i8> {
+    let name = db_name(stealing);
+    let mut f = std::io::BufReader::new(std::fs::File::open(&name).unwrap());
+    let n = {
+        let mut buf = [0; 8];
+        f.read_exact(&mut buf).unwrap();
+        u64::from_le_bytes(buf) as usize
+    };
+
+    let mut data = FnvHashMap::with_capacity_and_hasher(n, Default::default());
+    for i in 0..n {
+        let mut buf = [0; 8];
+        f.read_exact(&mut buf).unwrap();
+        let key = u64::from_le_bytes(buf);
+
+        let mut buf = [0; 2];
+        f.read_exact(&mut buf).unwrap();
+        let value = buf[0] as i8;
+        data.insert(key, value);
+    }
+    data
+}
+
 pub fn save(stealing: bool, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
     let name = db_name(stealing);
     let mut f = std::io::BufWriter::new(std::fs::File::create(&name)?);

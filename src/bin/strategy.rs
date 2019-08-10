@@ -6,7 +6,7 @@ use mancala_rust::{compact_key, learn::*, Board, Evaluator, NN6Evaluator};
 const STEALING: bool = true;
 
 lazy_static! {
-    static ref SCORE_MAP: FnvHashMap<u64, (i8, u8)> = load(STEALING);
+    static ref SCORE_MAP: FnvHashMap<u64, (i8, u8)> = just_load(STEALING);
 }
 
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
