@@ -36,7 +36,7 @@ fn search(board: &Board, eval: &mut NN6Evaluator, depth: u8, alpha: f64, beta: f
     let mut next_list = board.list_next().drain().collect::<Vec<_>>();
     next_list.sort_by_key(|b| F(-eval.eval(b)));
     for next in next_list {
-        let (s, f) = search(&next, eval, depth - 1, -beta, -alpha);
+        let (s, f) = search(&next, eval, depth - 1, -beta, -best_score);
         best_score = if best_score > -s { best_score } else { -s };
         full = full && f;
         if best_score >= beta {
