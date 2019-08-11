@@ -33,9 +33,7 @@ fn search(board: &Board, eval: &mut NN6Evaluator, depth: u8, alpha: f64, beta: f
     }
     let mut best_score = alpha;
     let mut full = true;
-    let mut next_list = board.list_next().drain().collect::<Vec<_>>();
-    next_list.sort_by_key(|b| F(-eval.eval(b)));
-    for next in next_list {
+    for next in board.list_next() {
         let (s, f) = search(&next, eval, depth - 1, -beta, -best_score);
         best_score = if best_score > -s { best_score } else { -s };
         full = full && f;
@@ -56,7 +54,7 @@ fn make(
     let key = compact_key(&board);
     if depth == 0 {
         println!("{}", board);
-        let (score, full) = search(board, eval, 30, -10000.0, 10000.0);
+        let (score, full) = search(board, eval, 20, -10000.0, 10000.0);
         data.insert(key, (-score, full));
         println!("{} {}", -score, full);
         return (-score, full);
