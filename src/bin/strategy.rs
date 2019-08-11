@@ -54,9 +54,13 @@ fn make(
     let key = compact_key(&board);
     if depth == 0 {
         println!("{}", board);
+        for d in 5..20 {
+            let t = std::time::Instant::now();
+            let (score, full) = search(board, eval, d, -10000.0, 10000.0);
+            println!("{} {} ({}msc)", -score, full, t.elapsed().as_millis());
+        }
         let (score, full) = search(board, eval, 20, -10000.0, 10000.0);
         data.insert(key, (-score, full));
-        println!("{} {}", -score, full);
         return (-score, full);
     }
     let mut best_score = std::f64::MIN;
