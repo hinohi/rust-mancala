@@ -158,7 +158,10 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
             if args.len() != 1 {
                 return Err("greedy".to_string());
             }
-            Ok(Box::new(GreedyAI::new(Mcg128Xsl64::from_entropy())))
+            Ok(Box::new(GreedyAI::new(
+                stealing,
+                Mcg128Xsl64::from_entropy(),
+            )))
         }
         _ => Err("(human|random|dfs|mctree|weighted|sparse|greedy)".to_string()),
     }
