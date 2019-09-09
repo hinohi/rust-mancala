@@ -55,10 +55,10 @@ pub fn load(stealing: bool) -> FnvHashMap<u64, (i8, u8)> {
 pub fn save(stealing: bool, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
     let name = db_name(stealing);
     let mut f = std::io::BufWriter::new(std::fs::File::create(&name)?);
-    f.write_all(&mut data.len().to_le_bytes())?;
+    f.write_all(&data.len().to_le_bytes())?;
     for (key, value) in data.iter() {
-        f.write_all(&mut key.to_le_bytes())?;
-        f.write_all(&mut [value.0 as u8, value.1])?;
+        f.write_all(&key.to_le_bytes())?;
+        f.write_all(&[value.0 as u8, value.1])?;
     }
     Ok(())
 }

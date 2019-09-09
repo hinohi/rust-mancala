@@ -32,7 +32,7 @@ impl Side {
     }
 
     #[inline]
-    pub fn turned(&self) -> Side {
+    pub fn turned(self) -> Side {
         match self {
             First => Second,
             Second => First,

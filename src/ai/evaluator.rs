@@ -67,9 +67,9 @@ lazy_static! {
         let mut score = [[0.0; 32]; 12];
         let data = include_str!("pos1_score.txt");
         let mut words = data.lines();
-        for p in 0..12 {
-            for s in 0..32 {
-                score[p][s] = words.next().unwrap().parse().unwrap();
+        for col in &mut score {
+            for s in col {
+                *s = words.next().unwrap().parse().unwrap();
             }
         }
         score

@@ -44,11 +44,9 @@ where
         }
         //　相手の領域にはみ出す遷移
         for (pos, &s) in board.self_seeds().iter().enumerate().rev() {
-            if PIT - pos < s as usize {
-                if self.stealing || pos < PIT - 1 {
-                    ret.push(pos);
-                    return ret;
-                }
+            if PIT - pos < s as usize && (self.stealing || pos < PIT - 1) {
+                ret.push(pos);
+                return ret;
             }
         }
         if self.stealing {
