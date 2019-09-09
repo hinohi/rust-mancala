@@ -3,6 +3,20 @@ use rand::Rng;
 use super::{Evaluator, Score};
 use crate::board::Board;
 
+#[derive(Copy, Clone, PartialOrd, PartialEq)]
+pub struct Ordable<F>(pub F);
+
+impl<F> Eq for Ordable<F> where F: PartialEq {}
+
+impl<F> Ord for Ordable<F>
+where
+    F: PartialOrd,
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
 pub fn ab_search<E: Evaluator>(
     board: Board,
     eval: &mut E,
@@ -13,8 +27,12 @@ pub fn ab_search<E: Evaluator>(
     if depth == 0 || board.is_finished() {
         return eval.eval(&board);
     }
+    let mut list = board.list_next().drain().collect::<Vec<_>>();
+    if depth >= 3 {
+        list.sort_by_cached_key(|b| Ordable(eval.eval(b)));
+    }
     let mut alpha = alpha;
-    for next in board.list_next() {
+    for next in list {
         let a = ab_search(next, eval, depth - 1, beta.flip(), alpha.flip()).flip();
         if a > alpha {
             alpha = a;
