@@ -25,8 +25,17 @@ impl Score for i8 {
 }
 
 impl Score for f64 {
-    const MIN: Self = -1267650600228229401496703205376.0;
-    const MAX: Self = 1267650600228229401496703205376.0;
+    const MIN: Self = -1e308;
+    const MAX: Self = 1e308;
+    #[inline]
+    fn flip(&self) -> Self {
+        -*self
+    }
+}
+
+impl Score for f32 {
+    const MIN: Self = -1e38;
+    const MAX: Self = 1e38;
     #[inline]
     fn flip(&self) -> Self {
         -*self

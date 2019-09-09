@@ -11,4 +11,4 @@ fnv = "*"
 lazy_static = "*"
 ndarray = { version = "*", features = ["serde-1"] }
 
-rust-nn = {version = "*", git = "https://github.com/hinohi/rust-nn" }
+rust-nn = {version = "*", path = "../../rust/rust-nn" }

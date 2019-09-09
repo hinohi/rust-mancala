@@ -89,9 +89,9 @@ where
             None => return,
         };
         for (x, b) in x.iter_mut().zip(board.iter()) {
-            *x = f64::from(*b);
+            *x = Float::from(*b);
         }
-        t[0] = f64::from(score);
+        t[0] = Float::from(score);
     }
 }
 
@@ -103,7 +103,7 @@ fn main() {
         Some(n) => n.parse::<i32>().unwrap(),
         None => 13, // 1.220703125e-4
     };
-    let lr = 2f64.powi(-pow2);
+    let lr = 2f64.powi(-pow2) as Float;
     let mut model = match args.get(1) {
         None => NN4Regression::new(
             [12, 64, 64, 64, 64],
