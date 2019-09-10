@@ -14,7 +14,12 @@ fn seed_scores(board: &Board) -> i8 {
     l0 - l1
 }
 
+const LIMIT: usize = 7_516_192_768;
+
 pub fn search(data: &mut FnvHashMap<u64, (i8, u8)>, board: Board, depth: u8) -> Option<(i8, u8)> {
+    if data.len() == LIMIT {
+        return None;
+    }
     let key = compact_key(&board);
     if let Some((l, d)) = data.get(&key) {
         return Some((raw_scores(&board) + *l, *d));
@@ -45,6 +50,9 @@ pub fn search(data: &mut FnvHashMap<u64, (i8, u8)>, board: Board, depth: u8) -> 
                 }
             }
         }
+    }
+    if data.len() == LIMIT {
+        return None;
     }
     data.insert(key, (best_score - raw_scores(&board), best_depth));
     Some((best_score, best_depth))

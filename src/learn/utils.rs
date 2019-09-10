@@ -14,7 +14,7 @@ pub fn load(stealing: bool) -> FnvHashMap<u64, (i8, u8)> {
     let mut f = match std::fs::File::open(&name) {
         Err(e) => {
             eprintln!("{} is not exists ({})", name, e);
-            return FnvHashMap::with_capacity_and_hasher(1024, Default::default());
+            return FnvHashMap::with_capacity_and_hasher(7 * 1024, Default::default());
         }
         Ok(f) => std::io::BufReader::new(f),
     };
@@ -23,13 +23,14 @@ pub fn load(stealing: bool) -> FnvHashMap<u64, (i8, u8)> {
         match f.read_exact(&mut buf) {
             Err(e) => {
                 eprintln!("read size failed: {}", e);
-                return FnvHashMap::with_capacity_and_hasher(1024, Default::default());
+                return FnvHashMap::with_capacity_and_hasher(7 * 1024, Default::default());
             }
             Ok(()) => u64::from_le_bytes(buf) as usize,
         }
     };
 
-    let mut data = FnvHashMap::with_capacity_and_hasher(n.next_power_of_two(), Default::default());
+    let cap = 7 * (n / 7).next_power_of_two();
+    let mut data = FnvHashMap::with_capacity_and_hasher(cap, Default::default());
     for i in 0..n {
         let mut buf = [0; 8];
         let key = match f.read_exact(&mut buf) {
