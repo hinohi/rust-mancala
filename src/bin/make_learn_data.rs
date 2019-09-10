@@ -5,12 +5,12 @@ use mancala_rust::{learn::*, MCTree};
 
 fn main() {
     let stealing = true;
-    let mut ai = MCTree::new(256, Mcg128Xsl64::from_entropy());
+    let mut ai = MCTree::new(32, Mcg128Xsl64::from_entropy());
     let mut data = load(stealing);
-    for i in 1..=300_000 {
+    for i in 1..=30_000 {
         let mut path = to_finish(stealing, &mut ai);
         while let Some(board) = path.pop() {
-            if search(&mut data, board, 20).is_none() {
+            if search(&mut data, board, 30).is_none() {
                 break;
             }
         }

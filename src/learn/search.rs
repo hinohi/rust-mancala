@@ -14,7 +14,7 @@ fn seed_scores(board: &Board) -> i8 {
     l0 - l1
 }
 
-const LIMIT: usize = 7_516_192_768;
+const LIMIT: usize = 3_758_096_384;
 
 pub fn search(data: &mut FnvHashMap<u64, (i8, u8)>, board: Board, depth: u8) -> Option<(i8, u8)> {
     if data.len() == LIMIT {
