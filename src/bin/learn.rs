@@ -5,7 +5,7 @@ use ndarray::{arr2, Array2};
 use rand::{Rng, SeedableRng};
 use rand_pcg::Mcg128Xsl64;
 
-use mancala_rust::learn::{iter_load, Load};
+use mancala_rust::learn::{db_name, iter_load, Load};
 use rust_nn::train::*;
 use rust_nn::Float;
 
@@ -56,7 +56,7 @@ impl DataIter {
     fn new(stealing: bool) -> DataIter {
         DataIter {
             stealing,
-            loader: iter_load(stealing).unwrap(),
+            loader: iter_load(&db_name(stealing)).unwrap(),
         }
     }
 }
@@ -72,7 +72,7 @@ impl Iterator for DataIter {
                     }
                 }
                 None => {
-                    self.loader = iter_load(self.stealing).unwrap();
+                    self.loader = iter_load(&db_name(self.stealing)).unwrap();
                 }
             }
         }
@@ -97,14 +97,14 @@ where
 
 fn main() {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
-    let stealing = true;
+    let stealing = args[0].parse().unwrap();
     let batch_size = 128;
-    let pow2 = match args.get(0) {
+    let pow2 = match args.get(1) {
         Some(n) => n.parse::<i32>().unwrap(),
         None => 13, // 1.220703125e-4
     };
     let lr = 2f64.powi(-pow2) as Float;
-    let mut model = match args.get(1) {
+    let mut model = match args.get(2) {
         None => NN4Regression::new(
             [12, 64, 64, 64, 64],
             batch_size,

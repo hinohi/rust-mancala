@@ -9,9 +9,8 @@ pub fn db_name(stealing: bool) -> String {
     format!("p{}s{}_{}.dat", PIT, SEED, stealing)
 }
 
-pub fn load(stealing: bool) -> FnvHashMap<u64, (i8, u8)> {
-    let name = db_name(stealing);
-    let mut f = match std::fs::File::open(&name) {
+pub fn load(name: &str) -> FnvHashMap<u64, (i8, u8)> {
+    let mut f = match std::fs::File::open(name) {
         Err(e) => {
             eprintln!("{} is not exists ({})", name, e);
             return FnvHashMap::with_capacity_and_hasher(7 * 1024, Default::default());
@@ -53,8 +52,7 @@ pub fn load(stealing: bool) -> FnvHashMap<u64, (i8, u8)> {
     data
 }
 
-pub fn save(stealing: bool, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
-    let name = db_name(stealing);
+pub fn save(name: &str, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
     let mut f = std::io::BufWriter::new(std::fs::File::create(&name)?);
     f.write_all(&data.len().to_le_bytes())?;
     for (key, value) in data.iter() {
@@ -64,8 +62,7 @@ pub fn save(stealing: bool, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result
     Ok(())
 }
 
-pub fn iter_load(stealing: bool) -> std::io::Result<Load> {
-    let name = db_name(stealing);
+pub fn iter_load(name: &str) -> std::io::Result<Load> {
     let mut f = std::io::BufReader::new(std::fs::File::open(&name)?);
     {
         let mut buf = [0; 8];
