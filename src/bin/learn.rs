@@ -134,7 +134,7 @@ fn main() {
     let mut data = ShuffledStream::new(
         DataIter::new(stealing),
         Mcg128Xsl64::from_entropy(),
-        batch_size * 128,
+        batch_size * 1024,
     );
     let mut epoch = 0_u64;
     let mut loss = 0.0;
@@ -142,12 +142,12 @@ fn main() {
         gen_case(&mut x, &mut t, &mut data);
         loss += model.train(&x, &t);
         epoch += 1;
-        if epoch % 100 == 0 {
-            println!("{} {}", epoch, loss / 100.0);
+        if epoch % 1_000 == 0 {
+            println!("{} {}", epoch, loss / 1000.0);
             loss = 0.0;
         }
         if epoch % 100_000 == 0 {
-            let name = format!("model/NN4_{}_{}.model", pow2, epoch);
+            let name = format!("model/NN4_{}_{}_{}.model", stealing, pow2, epoch);
             let mut f = BufWriter::new(File::create(name).unwrap());
             model.encode(&mut f);
         }
