@@ -64,7 +64,7 @@ fn main() {
     };
     let db = iter_load(&args[1]).expect("DBが開けません");
     let mut random = Mcg128Xsl64::from_entropy();
-    let mut hist = Hist::new(-10.0, 10.0, 2f64.powi(-4));
+    let mut hist = Hist::new(-20.0, 20.0, 2f64.powi(-4));
     let mut arr = Array1::zeros(12);
     for (board, exact, _) in db {
         if random.gen_range(0.0, 1.0) < 1e-2 {
