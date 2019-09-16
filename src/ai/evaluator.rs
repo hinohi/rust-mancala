@@ -44,7 +44,7 @@ impl Score for f32 {
 
 // -- ScoreDiff
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct ScoreDiffEvaluator;
 
 impl ScoreDiffEvaluator {
@@ -76,7 +76,7 @@ lazy_static! {
     };
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct ScorePosEvaluator;
 
 impl ScorePosEvaluator {
@@ -194,7 +194,7 @@ impl Score for WinRateScore {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MCTreeEvaluator<R> {
     random: R,
     num: usize,
@@ -222,7 +222,7 @@ impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WeightedMCTreeEvaluator<R, E> {
     random: R,
     eval: E,
@@ -285,7 +285,7 @@ fn nn_eval<R: Regression>(
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NN4Evaluator {
     nn: NN4Regression,
     input: Array1<rust_nn::Float>,
@@ -312,7 +312,7 @@ impl Evaluator for NN4Evaluator {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NN6Evaluator {
     nn: NN6Regression,
     input: Array1<rust_nn::Float>,

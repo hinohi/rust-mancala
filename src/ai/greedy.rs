@@ -3,6 +3,7 @@ use rand::Rng;
 use super::AI;
 use crate::board::{Board, PIT};
 
+#[derive(Debug, Clone)]
 pub struct GreedyAI<R> {
     stealing: bool,
     random: R,

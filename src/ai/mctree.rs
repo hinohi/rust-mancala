@@ -4,7 +4,7 @@ use super::evaluator::{MCTreeEvaluator, WeightedMCTreeEvaluator, WinRateScore};
 use super::{Evaluator, Score, AI};
 use crate::board::Board;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MCTree<R: Rng> {
     path_num: usize,
     evaluator: MCTreeEvaluator<R>,
@@ -47,7 +47,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WeightedMCTree<R, E> {
     path_num: usize,
     evaluator: WeightedMCTreeEvaluator<R, E>,

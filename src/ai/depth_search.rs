@@ -1,6 +1,7 @@
 use super::{utils::ab_search, Evaluator, Score, AI};
 use crate::board::Board;
 
+#[derive(Debug, Clone)]
 pub struct DepthSearchAI<E> {
     max_depth: usize,
     evaluator: E,

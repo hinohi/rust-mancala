@@ -5,7 +5,7 @@ use rand::{seq::SliceRandom, Rng};
 use super::{utils::ab_search, Evaluator, Score, AI};
 use crate::board::{Board, PIT};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct InteractiveAI<E> {
     evaluator: E,
     max_depth: usize,
@@ -79,6 +79,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct RandomAI<R> {
     random: R,
 }
