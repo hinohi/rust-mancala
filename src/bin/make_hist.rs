@@ -48,7 +48,7 @@ impl Hist {
             println!(
                 "{} {}",
                 self.min_value + self.value_step * (i as Float - 0.5),
-                *h as f64 / self.total_count as f64,
+                *h as f64 / self.total_count as f64 / self.value_step,
             );
         }
     }
