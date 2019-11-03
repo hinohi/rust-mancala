@@ -1,8 +1,8 @@
 use std::io::{Read, Write};
 use std::path::Path;
 
-use rand::Rng;
 use fnv::FnvHashMap;
+use rand::Rng;
 
 use crate::board::{PIT, SEED};
 use crate::from_compact_key;
@@ -117,24 +117,19 @@ impl RepeatLod {
 impl Iterator for RepeatLod {
     type Item = ([u8; 12], i8, u8);
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            match self.loader.next() {
-                Some(item) => {
-                    if item.2 > 0 {
-                        return Some(item);
-                    }
-                }
-                None => {
-                    self.loader = iter_load(&self.path).unwrap();
-                }
+        match self.loader.next() {
+            Some(item) => Some(item),
+            None => {
+                self.loader = iter_load(&self.path).unwrap();
+                self.loader.next().unwrap()
             }
         }
     }
 }
 
 pub struct ShuffledStream<I, R>
-    where
-        I: Iterator,
+where
+    I: Iterator,
 {
     iter: I,
     random: R,
@@ -142,9 +137,9 @@ pub struct ShuffledStream<I, R>
 }
 
 impl<I, R> ShuffledStream<I, R>
-    where
-        I: Iterator,
-        R: Rng,
+where
+    I: Iterator,
+    R: Rng,
 {
     pub fn new(iter: I, random: R, buffer: usize) -> ShuffledStream<I, R> {
         let mut iter = iter;
@@ -157,9 +152,9 @@ impl<I, R> ShuffledStream<I, R>
 }
 
 impl<I, R> Iterator for ShuffledStream<I, R>
-    where
-        I: Iterator,
-        R: Rng,
+where
+    I: Iterator,
+    R: Rng,
 {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
