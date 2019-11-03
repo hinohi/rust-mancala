@@ -1,5 +1,7 @@
 use std::io::{Read, Write};
+use std::path::Path;
 
+use rand::Rng;
 use fnv::FnvHashMap;
 
 use crate::board::{PIT, SEED};
@@ -62,8 +64,8 @@ pub fn save(name: &str, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()>
     Ok(())
 }
 
-pub fn iter_load(name: &str) -> std::io::Result<Load> {
-    let mut f = std::io::BufReader::new(std::fs::File::open(&name)?);
+pub fn iter_load<P: AsRef<Path>>(path: P) -> std::io::Result<Load> {
+    let mut f = std::io::BufReader::new(std::fs::File::open(path.as_ref())?);
     {
         let mut buf = [0; 8];
         f.read_exact(&mut buf)?
@@ -94,5 +96,76 @@ impl Iterator for Load {
             Ok(()) => (buf[0] as i8, buf[1]),
         };
         Some((from_compact_key(key), value.0, value.1))
+    }
+}
+
+pub struct RepeatLod {
+    path: String,
+    loader: Load,
+}
+
+impl RepeatLod {
+    pub fn new(path: &str) -> RepeatLod {
+        let loader = iter_load(path).unwrap();
+        RepeatLod {
+            path: path.to_string(),
+            loader,
+        }
+    }
+}
+
+impl Iterator for RepeatLod {
+    type Item = ([u8; 12], i8, u8);
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.loader.next() {
+                Some(item) => {
+                    if item.2 > 0 {
+                        return Some(item);
+                    }
+                }
+                None => {
+                    self.loader = iter_load(&self.path).unwrap();
+                }
+            }
+        }
+    }
+}
+
+pub struct ShuffledStream<I, R>
+    where
+        I: Iterator,
+{
+    iter: I,
+    random: R,
+    buf: Vec<I::Item>,
+}
+
+impl<I, R> ShuffledStream<I, R>
+    where
+        I: Iterator,
+        R: Rng,
+{
+    pub fn new(iter: I, random: R, buffer: usize) -> ShuffledStream<I, R> {
+        let mut iter = iter;
+        let mut buf = Vec::with_capacity(buffer);
+        for _ in 0..buffer {
+            buf.push(iter.next().unwrap())
+        }
+        ShuffledStream { iter, random, buf }
+    }
+}
+
+impl<I, R> Iterator for ShuffledStream<I, R>
+    where
+        I: Iterator,
+        R: Rng,
+{
+    type Item = I::Item;
+    fn next(&mut self) -> Option<Self::Item> {
+        let idx = self.random.gen_range(0, self.buf.len());
+        let item = self.buf.swap_remove(idx);
+        self.buf.push(self.iter.next().unwrap());
+        Some(item)
     }
 }
