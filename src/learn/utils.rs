@@ -121,7 +121,7 @@ impl Iterator for RepeatLod {
             Some(item) => Some(item),
             None => {
                 self.loader = iter_load(&self.path).unwrap();
-                self.loader.next().unwrap()
+                self.loader.next()
             }
         }
     }
