@@ -7,10 +7,7 @@ pub struct DepthSearchAI<E> {
     evaluator: E,
 }
 
-impl<E> DepthSearchAI<E>
-where
-    E: Evaluator,
-{
+impl<E> DepthSearchAI<E> {
     pub fn new(evaluator: E, max_depth: usize) -> DepthSearchAI<E> {
         DepthSearchAI {
             max_depth,

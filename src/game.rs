@@ -26,6 +26,12 @@ impl Game {
         self.show_board = show;
     }
 
+    pub fn first_sow(&mut self, pos_list: &[usize]) {
+        for pos in pos_list {
+            self.board.sow(*pos);
+        }
+    }
+
     fn proceed(&mut self) {
         let time = Instant::now();
         let pos_list = if self.board.side() == Side::First {

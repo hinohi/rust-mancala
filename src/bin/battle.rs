@@ -30,8 +30,13 @@ fn main() {
             exit(1);
         }
     };
+    let first_sow = args[4..]
+        .iter()
+        .map(|s| s.parse().unwrap())
+        .collect::<Vec<_>>();
     let mut game = Game::new(stealing, a, b);
     game.show_board(true);
+    game.first_sow(&first_sow);
     let (a, b) = game.run();
     println!("{} {}", a, b);
 }
