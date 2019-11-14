@@ -90,6 +90,23 @@ impl Board {
         }
     }
 
+    pub fn from_seeds(stealing: bool, seeds: &[u8]) -> Board {
+        assert_eq!(seeds.len(), PIT * 2);
+        let mut s = [[SEED; PIT]; 2];
+        for i in 0..PIT {
+            s[0][i] = seeds[i];
+        }
+        for i in 0..PIT {
+            s[1][i] = seeds[i + PIT];
+        }
+        Board {
+            side: First,
+            stealing,
+            seeds: s,
+            score: [0, 0],
+        }
+    }
+
     pub fn side(&self) -> Side {
         self.side
     }
@@ -162,10 +179,7 @@ impl Board {
 
     pub fn can_sow(&self, pos: usize) -> Result<(), String> {
         if pos >= PIT {
-            return Err(format!(
-                "0から{}の間で指定してください",
-                PIT - 1
-            ));
+            return Err(format!("0から{}の間で指定してください", PIT - 1));
         }
         if self.seeds[self.side.as_usize()][pos] == 0 {
             return Err("そこには石が残っていません".to_string());
@@ -406,5 +420,19 @@ mod tests {
         board.sow(5);
         assert_eq!(board.score(), -2);
         assert_eq!(board.last_score(), (5 - 1) * 2);
+    }
+
+    #[test]
+    fn from_seeds() {
+        let mut board = Board::new(true);
+        board.sow(2);
+        board.sow(5);
+
+        let key = compact_key(&board);
+        let seeds = from_compact_key(key);
+        let b = Board::from_seeds(true, &seeds);
+
+        assert_eq!(board.self_seeds(), b.self_seeds());
+        assert_eq!(board.opposite_seed(), b.opposite_seed());
     }
 }
