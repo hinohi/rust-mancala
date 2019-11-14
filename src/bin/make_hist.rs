@@ -75,6 +75,7 @@ fn main() {
         let score_s = score_s.clone();
         spawn(move || worker(stealing, depth, board_r, score_s));
     }
+    drop(score_s);
 
     spawn(move || {
         let mut random = Mcg128Xsl64::from_entropy();
