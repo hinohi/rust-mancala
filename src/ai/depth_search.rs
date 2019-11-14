@@ -25,7 +25,7 @@ where
         if next_lists.len() == 1 {
             return next_lists.drain().next().unwrap().1;
         }
-        let mut best = vec![];
+        let mut best = Vec::new();
         let mut best_score = E::Score::MIN;
         for (next, pos_list) in next_lists {
             let s = ab_search(
@@ -33,7 +33,7 @@ where
                 &mut self.evaluator,
                 self.max_depth,
                 E::Score::MIN,
-                E::Score::MAX,
+                best_score.flip(),
             )
             .flip();
             if s > best_score {
