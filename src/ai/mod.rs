@@ -8,15 +8,14 @@ mod utils;
 pub use self::depth_search::DepthSearchAI;
 pub use self::evaluator::*;
 pub use self::greedy::GreedyAI;
-pub use self::mctree::MCTree;
+pub use self::mctree::{MCTree, WeightedMCTree};
 pub use self::simple::{InteractiveAI, RandomAI};
 
 use std::fmt::Debug;
 
 use rand::SeedableRng;
-use rand_pcg::{Mcg128Xsl64 as Rng, Mcg128Xsl64};
+use rand_pcg::Mcg128Xsl64 as Rng;
 
-use crate::ai::mctree::WeightedMCTree;
 use crate::board::Board;
 
 pub trait AI {
@@ -158,11 +157,8 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
             if args.len() != 1 {
                 return Err("greedy".to_string());
             }
-            Ok(Box::new(GreedyAI::new(
-                stealing,
-                Mcg128Xsl64::from_entropy(),
-            )))
+            Ok(Box::new(GreedyAI::new(stealing, Rng::from_entropy())))
         }
-        _ => Err("(human|random|dfs|mctree|weighted|sparse|greedy)".to_string()),
+        _ => Err("(human|random|dfs|mctree|weighted|greedy)".to_string()),
     }
 }
