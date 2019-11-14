@@ -1,12 +1,13 @@
 use std::env::args;
-use std::fs::File;
 
-use ndarray::Array1;
+use crossbeam::{
+    channel::{bounded, unbounded, Receiver, Sender},
+    thread::scope,
+};
 use rand::{Rng, SeedableRng};
 use rand_pcg::Mcg128Xsl64;
 
-use mancala_rust::learn::*;
-use rust_nn::predict::*;
+use mancala_rust::{ab_search, learn::*, Board, NN6Evaluator};
 use rust_nn::Float;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -54,26 +55,45 @@ impl Hist {
     }
 }
 
+fn worker(stealing: bool, depth: usize, r: Receiver<(Board, i8)>, s: Sender<Float>) {
+    let mut eval = NN6Evaluator::new(stealing);
+    while let Ok((board, exact)) = r.recv() {
+        let score = ab_search(board, &mut eval, depth, -1e10, 1e10);
+        s.send(score - exact as Float).unwrap();
+    }
+}
+
 fn main() {
     let args = args().skip(1).collect::<Vec<_>>();
-    let mut model = {
-        let mut f = std::io::BufReader::new(
-            File::open(&args[0]).expect("モデルファイルが開けません"),
-        );
-        NN6Regression::new(&mut f)
-    };
-    let db = iter_load(&args[1]).expect("DBが開けません");
-    let mut random = Mcg128Xsl64::from_entropy();
-    let mut hist = Hist::new(-20.0, 20.0, 2f64.powi(-4));
-    let mut arr = Array1::zeros(12);
-    for (board, exact, _) in db {
-        if random.gen_range(0.0, 1.0) < 1e-2 {
-            for (i, &s) in board.iter().enumerate() {
-                arr[i] = s as Float;
+    let stealing = args[0].parse().expect("stealing");
+    let depth = args[1].parse().expect("depth");
+    let db_path = &args[2];
+    let num_worker = args[3].parse().expect("num worker");
+    let (board_s, board_r) = bounded(1024);
+    let (score_s, score_r) = unbounded();
+
+    for _ in 0..num_worker {
+        let board_r = board_r.clone();
+        let score_s = score_s.clone();
+        scope(|_| worker(stealing, depth, board_r, score_s)).unwrap();
+    }
+
+    scope(move |_| {
+        let mut random = Mcg128Xsl64::from_entropy();
+        let db = iter_load(db_path).expect("DBが開けません");
+        for (seeds, exact, _) in db {
+            if random.gen_range(0.0, 1.0) < 1e-2 {
+                board_s
+                    .send((Board::from_seeds(stealing, &seeds), exact))
+                    .unwrap();
             }
-            let predict = model.predict(&arr);
-            hist.count(predict - exact as Float);
         }
+    })
+    .unwrap();
+
+    let mut hist = Hist::new(-20.0, 20.0, 2f64.powi(-4));
+    while let Ok(diff) = score_r.recv() {
+        hist.count(diff);
     }
     hist.dump();
 }

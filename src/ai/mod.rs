@@ -10,6 +10,7 @@ pub use self::evaluator::*;
 pub use self::greedy::GreedyAI;
 pub use self::mctree::{MCTree, WeightedMCTree};
 pub use self::simple::{InteractiveAI, RandomAI};
+pub use utils::ab_search;
 
 use std::fmt::Debug;
 
