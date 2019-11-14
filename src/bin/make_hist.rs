@@ -1,9 +1,7 @@
 use std::env::args;
+use std::thread::spawn;
 
-use crossbeam::{
-    channel::{bounded, unbounded, Receiver, Sender},
-    thread::scope,
-};
+use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 use rand::{Rng, SeedableRng};
 use rand_pcg::Mcg128Xsl64;
 
@@ -67,7 +65,7 @@ fn main() {
     let args = args().skip(1).collect::<Vec<_>>();
     let stealing = args[0].parse().expect("stealing");
     let depth = args[1].parse().expect("depth");
-    let db_path = &args[2];
+    let db_path = args[2].clone();
     let num_worker = args[3].parse().expect("num worker");
     let (board_s, board_r) = bounded(1024);
     let (score_s, score_r) = unbounded();
@@ -75,10 +73,10 @@ fn main() {
     for _ in 0..num_worker {
         let board_r = board_r.clone();
         let score_s = score_s.clone();
-        scope(|_| worker(stealing, depth, board_r, score_s)).unwrap();
+        spawn(move || worker(stealing, depth, board_r, score_s));
     }
 
-    scope(move |_| {
+    spawn(move || {
         let mut random = Mcg128Xsl64::from_entropy();
         let db = iter_load(db_path).expect("DBが開けません");
         for (seeds, exact, _) in db {
@@ -88,12 +86,14 @@ fn main() {
                     .unwrap();
             }
         }
-    })
-    .unwrap();
-
-    let mut hist = Hist::new(-20.0, 20.0, 2f64.powi(-4));
-    while let Ok(diff) = score_r.recv() {
-        hist.count(diff);
-    }
+    });
+    let h = spawn(move || {
+        let mut hist = Hist::new(-20.0, 20.0, 2f64.powi(-4));
+        while let Ok(diff) = score_r.recv() {
+            hist.count(diff);
+        }
+        hist
+    });
+    let hist = h.join().unwrap();
     hist.dump();
 }
