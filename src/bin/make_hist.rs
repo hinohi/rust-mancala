@@ -2,8 +2,6 @@ use std::env::args;
 use std::thread::spawn;
 
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
-use rand::{Rng, SeedableRng};
-use rand_pcg::Mcg128Xsl64;
 
 use mancala_rust::{ab_search, learn::*, Board, NN6Evaluator};
 use rust_nn::Float;
@@ -78,18 +76,15 @@ fn main() {
     drop(score_s);
 
     spawn(move || {
-        let mut random = Mcg128Xsl64::from_entropy();
         let db = iter_load(db_path).expect("DBが開けません");
         for (seeds, exact, _) in db {
-            if random.gen_range(0.0, 1.0) < 1e-2 {
-                board_s
-                    .send((Board::from_seeds(stealing, &seeds), exact))
-                    .unwrap();
-            }
+            board_s
+                .send((Board::from_seeds(stealing, &seeds), exact))
+                .unwrap();
         }
     });
     let h = spawn(move || {
-        let mut hist = Hist::new(-20.0, 20.0, 2f64.powi(-4));
+        let mut hist = Hist::new(-50.0, 50.0, 2f64.powi(-10));
         while let Ok(diff) = score_r.recv() {
             hist.count(diff);
         }
