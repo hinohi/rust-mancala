@@ -2,7 +2,7 @@ use crate::ai::Score;
 
 impl Score for i32 {
     const MIN: Self = std::i32::MIN + 1;
-    const MAX: Self = std::i32::MAX - 1;
+    const MAX: Self = std::i32::MAX;
     #[inline]
     fn flip(&self) -> Self {
         -*self
@@ -11,7 +11,7 @@ impl Score for i32 {
 
 impl Score for i8 {
     const MIN: Self = std::i8::MIN + 1;
-    const MAX: Self = std::i8::MAX - 1;
+    const MAX: Self = std::i8::MAX;
     #[inline]
     fn flip(&self) -> Self {
         -*self
@@ -115,7 +115,7 @@ impl Score for WinRateScore {
         win: std::u32::MAX,
         draw: std::u32::MAX,
         lose: 0,
-        score: std::i32::MAX - 1,
+        score: std::i32::MAX,
     };
     fn flip(&self) -> Self {
         WinRateScore {
