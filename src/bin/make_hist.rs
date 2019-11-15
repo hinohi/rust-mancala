@@ -83,7 +83,7 @@ fn main() {
         bar.set_draw_target(ProgressDrawTarget::stderr());
         bar.set_style(
             ProgressStyle::default_bar()
-                .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>10}/{len}"),
+                .template("{bar:40.cyan/blue} {pos:>10}/{len} [{elapsed_precise}/{eta_precise}]"),
         );
         for (seeds, exact, _) in db {
             bar.inc(1);
