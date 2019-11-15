@@ -56,7 +56,7 @@ pub fn load(name: &str) -> FnvHashMap<u64, (i8, u8)> {
 
 pub fn save(name: &str, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
     let mut f = std::io::BufWriter::new(std::fs::File::create(&name)?);
-    f.write_all(&data.len().to_le_bytes())?;
+    f.write_all(&(data.len() as u64).to_le_bytes())?;
     for (key, value) in data.iter() {
         f.write_all(&key.to_le_bytes())?;
         f.write_all(&[value.0 as u8, value.1])?;
@@ -66,14 +66,16 @@ pub fn save(name: &str, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()>
 
 pub fn iter_load<P: AsRef<Path>>(path: P) -> std::io::Result<Load> {
     let mut f = std::io::BufReader::new(std::fs::File::open(path.as_ref())?);
-    {
+    let n = {
         let mut buf = [0; 8];
-        f.read_exact(&mut buf)?
-    }
-    Ok(Load { f })
+        f.read_exact(&mut buf)?;
+        u64::from_le_bytes(buf) as usize
+    };
+    Ok(Load { n, f })
 }
 
 pub struct Load {
+    n: usize,
     f: std::io::BufReader<std::fs::File>,
 }
 
@@ -96,6 +98,10 @@ impl Iterator for Load {
             Ok(()) => (buf[0] as i8, buf[1]),
         };
         Some((from_compact_key(key), value.0, value.1))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.n, Some(self.n))
     }
 }
 
