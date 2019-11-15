@@ -2,6 +2,7 @@ use std::env::args;
 use std::thread::spawn;
 
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
+use indicatif::{ProgressBar, ProgressDrawTarget};
 
 use mancala_rust::{ab_search, learn::*, Board, NN6Evaluator};
 use rust_nn::Float;
@@ -77,11 +78,16 @@ fn main() {
 
     spawn(move || {
         let db = iter_load(db_path).expect("DBが開けません");
+        let n = db.size_hint().1.unwrap();
+        let bar = ProgressBar::new(n as u64);
+        bar.set_draw_target(ProgressDrawTarget::stderr());
         for (seeds, exact, _) in db {
+            bar.inc(1);
             board_s
                 .send((Board::from_seeds(stealing, &seeds), exact))
                 .unwrap();
         }
+        bar.finish();
     });
     let h = spawn(move || {
         let mut hist = Hist::new(-50.0, 50.0, 2f64.powi(-10));
