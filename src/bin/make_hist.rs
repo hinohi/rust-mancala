@@ -2,7 +2,7 @@ use std::env::args;
 use std::thread::spawn;
 
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
-use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
+use indicatif::{ProgressBar, ProgressStyle};
 use rand::Rng;
 use rand_pcg::Mcg128Xsl64;
 
@@ -86,14 +86,15 @@ fn main() {
         let db = iter_load(db_path).expect("DBが開けません");
         let n = db.size_hint().1.unwrap();
         let bar = ProgressBar::new(n as u64);
-        bar.set_draw_target(ProgressDrawTarget::stderr());
         bar.set_style(
             ProgressStyle::default_bar()
-                .template("{bar:40.cyan/blue} {pos:>10}/{len} [{elapsed_precise}/{eta_precise}]"),
+                .template("{bar:40.cyan/blue} {pos}/{len} [{elapsed_precise}/{eta_precise}]"),
         );
         let mut r = Mcg128Xsl64::new(1);
-        for (seeds, exact, _) in db {
-            bar.inc(1);
+        for (i, (seeds, exact, _)) in db.enumerate() {
+            if (i + 1) % 1048576 == 0 {
+                bar.inc(1048576);
+            }
             if use_rate >= 1.0 || r.gen_range(0.0, 1.0) < use_rate {
                 board_s
                     .send((Board::from_seeds(stealing, &seeds), exact))
