@@ -1,23 +1,19 @@
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 
-use ndarray::{arr2, Array2};
+use ndarray::Array2;
 use rand::SeedableRng;
 use rand_pcg::Mcg128Xsl64;
 
 use mancala_rust::learn::{RepeatLod, ShuffledStream};
-use rust_nn::train::*;
-use rust_nn::Float;
+use rust_nn::{train::*, Float};
 
 fn gen_case<I>(x: &mut Array2<Float>, t: &mut Array2<Float>, data: &mut I)
 where
     I: Iterator<Item = ([u8; 12], i8, u8)>,
 {
     for (mut x, mut t) in x.genrows_mut().into_iter().zip(t.genrows_mut()) {
-        let (board, score, _) = match data.next() {
-            Some(row) => row,
-            None => return,
-        };
+        let (board, score, _) = data.next().unwrap();
         for (x, b) in x.iter_mut().zip(board.iter()) {
             *x = Float::from(*b);
         }
@@ -29,6 +25,7 @@ fn main() {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     let db_path = args[0].as_str();
     let save_path = args[1].as_str();
+    assert_ne!(db_path, save_path);
     let batch_size = 128;
     let pow2 = match args.get(2) {
         Some(n) => n.parse::<i32>().unwrap(),
@@ -53,15 +50,8 @@ fn main() {
         }
     };
 
-    let mut x = Vec::new();
-    let mut t = Vec::new();
-    for _ in 0..batch_size {
-        x.push([0.0; 12]);
-        t.push([0.0; 1]);
-    }
-    let mut x = arr2(&x);
-    let mut t = arr2(&t);
-
+    let mut x = Array2::zeros([batch_size, 12]);
+    let mut t = Array2::zeros([batch_size, 1]);
     let mut data = ShuffledStream::new(
         RepeatLod::new(db_path),
         Mcg128Xsl64::from_entropy(),
