@@ -3,6 +3,8 @@ use std::thread::spawn;
 
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
+use rand::Rng;
+use rand_pcg::Mcg128Xsl64;
 
 use mancala_rust::{ab_search, learn::*, Board, NN6Evaluator};
 use rust_nn::Float;
@@ -66,6 +68,10 @@ fn main() {
     let depth = args[1].parse().expect("depth");
     let db_path = args[2].clone();
     let num_worker = args[3].parse().expect("num worker");
+    let use_rate = match args.get(4) {
+        Some(s) => s.parse().unwrap(),
+        None => 1.0,
+    };
     let (board_s, board_r) = bounded(1024);
     let (score_s, score_r) = unbounded();
 
@@ -85,11 +91,14 @@ fn main() {
             ProgressStyle::default_bar()
                 .template("{bar:40.cyan/blue} {pos:>10}/{len} [{elapsed_precise}/{eta_precise}]"),
         );
+        let mut r = Mcg128Xsl64::new(1);
         for (seeds, exact, _) in db {
             bar.inc(1);
-            board_s
-                .send((Board::from_seeds(stealing, &seeds), exact))
-                .unwrap();
+            if use_rate >= 1.0 || r.gen_range(0.0, 1.0) < use_rate {
+                board_s
+                    .send((Board::from_seeds(stealing, &seeds), exact))
+                    .unwrap();
+            }
         }
         bar.finish();
     });
