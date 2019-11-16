@@ -58,7 +58,7 @@ pub fn random_down<R: Rng>(random: &mut R, board: Board) -> Board {
 }
 
 #[inline]
-fn soft_max(x: &mut [f64]) {
+pub fn soft_max(x: &mut [f64]) {
     let max = x.iter().fold(std::f64::NAN, |x, v| x.max(*v));
     x.iter_mut()
         .map(|v| {
@@ -68,7 +68,7 @@ fn soft_max(x: &mut [f64]) {
 }
 
 #[inline]
-fn choice_with_weight<R: Rng>(random: &mut R, weight: &[f64]) -> usize {
+pub fn choice_with_weight<R: Rng>(random: &mut R, weight: &[f64]) -> usize {
     let sum = weight.iter().fold(0.0, |x, y| x + *y);
     let r = random.gen_range(0.0, sum);
     let mut p = 0.0;
