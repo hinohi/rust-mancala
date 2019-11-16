@@ -5,7 +5,7 @@ mod mctree;
 mod simple;
 mod utils;
 
-pub use self::depth_search::DepthSearchAI;
+pub use self::depth_search::{DepthSearchAI, RandomDepthSearchAI};
 pub use self::evaluator::*;
 pub use self::greedy::GreedyAI;
 pub use self::mctree::{MCTree, WeightedMCTree};
@@ -110,6 +110,49 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                 }
             })
         }
+        "rdfs" => {
+            if args.len() != 4 {
+                return Err("rdfs:(eval):(max_depth):(weight)".to_string());
+            }
+            let max_depth = match args[2].parse() {
+                Ok(d) => d,
+                Err(e) => return Err(format!("max_depth must be usize: {}", e)),
+            };
+            let weight = match args[3].parse() {
+                Ok(w) => w,
+                Err(e) => return Err(format!("weight must be f64: {}", e)),
+            };
+            let random = Rng::from_entropy();
+            Ok(match args[1] {
+                "diff" => Box::new(RandomDepthSearchAI::new(
+                    max_depth,
+                    weight,
+                    ScoreDiffEvaluator::new(),
+                    random,
+                )),
+                "pos" => Box::new(RandomDepthSearchAI::new(
+                    max_depth,
+                    weight,
+                    ScorePosEvaluator::new(),
+                    random,
+                )),
+                "nn4" => Box::new(RandomDepthSearchAI::new(
+                    max_depth,
+                    weight,
+                    NN4Evaluator::new(stealing),
+                    random,
+                )),
+                "nn6" => Box::new(RandomDepthSearchAI::new(
+                    max_depth,
+                    weight,
+                    NN6Evaluator::new(stealing),
+                    random,
+                )),
+                _ => {
+                    return Err("rdfs:(diff|pos|nn4|nn6):(max_depth):(weight)".to_string());
+                }
+            })
+        }
         "mctree" => {
             if args.len() != 2 {
                 return Err("mctree:(num)".to_string());
@@ -160,6 +203,6 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
             }
             Ok(Box::new(GreedyAI::new(stealing, Rng::from_entropy())))
         }
-        _ => Err("(human|random|dfs|mctree|weighted|greedy)".to_string()),
+        _ => Err("(human|random|dfs|rdfs|mctree|weighted|greedy)".to_string()),
     }
 }
