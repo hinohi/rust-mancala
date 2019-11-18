@@ -26,13 +26,10 @@ fn main() {
     let db_path = args[0].as_str();
     let save_path = args[1].as_str();
     assert_ne!(db_path, save_path);
-    let batch_size = 128;
-    let pow2 = match args.get(2) {
-        Some(n) => n.parse::<i32>().unwrap(),
-        None => 13, // 1.220703125e-4
-    };
+    let pow2 = args[2].parse::<i32>().unwrap();
+    let batch_size = args[3].parse().unwrap();
     let lr = 2f64.powi(-pow2) as Float;
-    let mut model = match args.get(3) {
+    let mut model = match args.get(4) {
         None => NN4Regression::new(
             [12, 64, 64, 64, 64],
             batch_size,
