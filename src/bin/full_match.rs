@@ -4,14 +4,12 @@ use mancala_rust::*;
 
 fn main() {
     let list = [
-        "dfs:nn4:5",
-        "weighted:diff:10",
-        "weighted:pos:10",
-        "weighted:nn4:10",
-        "random",
-        "dfs:diff:9",
-        "dfs:pos:7",
-        "mctree:12",
+        "rdfs:nn6:0:1",
+        "rdfs:nn6:2:1",
+        "rdfs:nn6:4:1",
+        "rdfs:nn6:6:1",
+        "rdfs:nn6:8:1",
+        "rdfs:nn6:10:1",
     ];
     let args = args().collect::<Vec<_>>();
     let stealing = args[1].parse().unwrap();
