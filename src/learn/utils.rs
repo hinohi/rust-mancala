@@ -164,7 +164,7 @@ where
 {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
-        let idx = self.random.gen_range(0, self.buf.len());
+        let idx = self.random.gen_range(0..self.buf.len());
         let item = self.buf.swap_remove(idx);
         self.buf.push(self.iter.next().unwrap());
         Some(item)

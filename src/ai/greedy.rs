@@ -58,7 +58,7 @@ where
                 .enumerate()
                 .filter_map(|(pos, &s)| if s > 0 { Some(pos) } else { None })
                 .collect::<Vec<_>>();
-            ret.push(cond[self.random.gen_range(0, cond.len())]);
+            ret.push(cond[self.random.gen_range(0..cond.len())]);
         } else {
             for (pos, &s) in board.self_seeds().iter().enumerate().rev() {
                 if pos < PIT - 1 && s > 0 {
