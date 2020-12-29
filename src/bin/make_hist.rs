@@ -95,7 +95,7 @@ fn main() {
             if (i + 1) % 1048576 == 0 {
                 bar.inc(1048576);
             }
-            if use_rate >= 1.0 || r.gen_range(0.0, 1.0) < use_rate {
+            if use_rate >= 1.0 || r.gen_range(0.0..1.0) < use_rate {
                 board_s
                     .send((Board::from_seeds(stealing, &seeds), exact))
                     .unwrap();
