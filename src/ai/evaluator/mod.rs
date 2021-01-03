@@ -1,8 +1,9 @@
+mod nn4_true;
 mod score;
 
 use ndarray::Array1;
 use rand::Rng;
-use rust_nn::predict::{NN4Regression, NN6Regression, Regression};
+use rust_nn::predict::{NN6Regression, Regression};
 
 use super::utils::{random_down, random_down_with_weight};
 use super::Evaluator;
@@ -135,8 +136,6 @@ where
 
 // -- Neural Network base
 
-static NN4_TRUE_MODEL: &[u8] = include_bytes!("NN4_true.model");
-static NN4_FALSE_MODEL: &[u8] = include_bytes!("NN4_false.model");
 static NN6_TRUE_MODEL: &[u8] = include_bytes!("NN6_true.model");
 static NN6_FALSE_MODEL: &[u8] = include_bytes!("NN6_false.model");
 
@@ -162,29 +161,18 @@ fn nn_eval<R: Regression>(
 }
 
 #[derive(Debug, Clone)]
-pub struct NN4Evaluator {
-    nn: NN4Regression,
-    input: Array1<rust_nn::Float>,
-}
+pub struct NN4Evaluator;
 
 impl NN4Evaluator {
-    pub fn new(stealing: bool) -> NN4Evaluator {
-        let mut model = if stealing {
-            NN4_TRUE_MODEL
-        } else {
-            NN4_FALSE_MODEL
-        };
-        NN4Evaluator {
-            nn: NN4Regression::new(&mut model),
-            input: Array1::zeros(12),
-        }
+    pub fn new(_: bool) -> NN4Evaluator {
+        NN4Evaluator
     }
 }
 
 impl Evaluator for NN4Evaluator {
     type Score = rust_nn::Float;
     fn eval(&mut self, board: &Board) -> Self::Score {
-        nn_eval(&mut self.nn, &mut self.input, board)
+        nn4_true::eval(board.self_seeds(), board.opposite_seed())
     }
 }
 
