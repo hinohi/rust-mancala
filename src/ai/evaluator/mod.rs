@@ -91,7 +91,7 @@ impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
     fn eval(&mut self, board: &Board) -> Self::Score {
         let mut score = Self::Score::default();
         for _ in 0..self.num {
-            let s = random_down(&mut self.random, board.clone()).last_score();
+            let s = random_down(&mut self.random, &board).last_score();
             score.count(i32::from(s));
         }
         score

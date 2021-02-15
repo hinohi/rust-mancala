@@ -44,8 +44,8 @@ pub fn ab_search<E: Evaluator>(
     alpha
 }
 
-pub fn random_down<R: Rng>(random: &mut R, board: Board) -> Board {
-    let mut board = board;
+pub fn random_down<R: Rng>(random: &mut R, board: &Board) -> Board {
+    let mut board = board.clone();
     loop {
         let mut next_list = board.list_next().drain().collect::<Vec<_>>();
         if next_list.is_empty() {
@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn smoke_random_down() {
         let mut random = Mcg128Xsl64::new(1);
-        let board = random_down(&mut random, Board::new(false));
+        let board = random_down(&mut random, &Board::new(false));
         assert!(board.is_finished());
     }
 

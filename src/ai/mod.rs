@@ -1,12 +1,14 @@
 mod depth_search;
 mod evaluator;
 mod greedy;
+mod mctree;
 mod simple;
 mod utils;
 
 pub use self::depth_search::{DepthSearchAI, RandomDepthSearchAI};
 pub use self::evaluator::*;
 pub use self::greedy::GreedyAI;
+pub use self::mctree::McTreeAI;
 pub use self::simple::{InteractiveAI, RandomAI};
 pub use utils::ab_search;
 
@@ -138,6 +140,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                 }
             })
         }
+        "mctree" => Ok(Box::new(McTreeAI::new(Rng::from_entropy()))),
         "greedy" => {
             if args.len() != 1 {
                 return Err("greedy".to_string());
