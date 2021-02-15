@@ -2,23 +2,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 
 use rand_pcg::Mcg128Xsl64;
 
-use mancala_rust::{
-    Board, DepthSearchAI, MCTree, NN4Evaluator, NN6Evaluator, ScoreDiffEvaluator, AI,
-};
-
-fn mctree_with_stealing(c: &mut Criterion) {
-    let mut ai = MCTree::new(10, Mcg128Xsl64::new(1));
-    c.bench_function("mctree_with_stealing", |b| {
-        b.iter(|| ai.sow(&Board::new(true)))
-    });
-}
-
-fn mctree_no_stealing(c: &mut Criterion) {
-    let mut ai = MCTree::new(10, Mcg128Xsl64::new(1));
-    c.bench_function("mctree_no_stealing", |b| {
-        b.iter(|| ai.sow(&Board::new(false)))
-    });
-}
+use mancala_rust::{Board, DepthSearchAI, NN4Evaluator, NN6Evaluator, ScoreDiffEvaluator, AI};
 
 fn dfs5_with_stealing(c: &mut Criterion) {
     let mut ai = DepthSearchAI::new(ScoreDiffEvaluator::new(), 5);
@@ -60,8 +44,6 @@ fn nn6_dfs2(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    mctree_with_stealing,
-    mctree_no_stealing,
     dfs5_with_stealing,
     dfs5_no_stealing,
     dfs6_with_stealing,
