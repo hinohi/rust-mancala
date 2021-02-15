@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 use rand::Rng;
 
 use super::{
@@ -17,7 +19,7 @@ struct Node {
 
 pub struct McTreeAI<R> {
     rng: R,
-    target_count: u32,
+    limit: Duration,
     expansion_threshold: u32,
     c: f64,
 }
@@ -35,12 +37,12 @@ impl Node {
 }
 
 impl<R: Rng> McTreeAI<R> {
-    pub fn new(rng: R) -> McTreeAI<R> {
+    pub fn new(rng: R, limit: u64, expansion_threshold: u32, c: f64) -> McTreeAI<R> {
         McTreeAI {
             rng,
-            target_count: 10_000,
-            expansion_threshold: 2,
-            c: 2.0,
+            limit: Duration::from_millis(limit),
+            expansion_threshold,
+            c,
         }
     }
 
@@ -111,6 +113,7 @@ impl<R: Rng> McTreeAI<R> {
 
 impl<R: Rng> AI for McTreeAI<R> {
     fn sow(&mut self, board: &Board) -> Vec<usize> {
+        let start = Instant::now();
         let next_with_pos = board.list_next_with_pos();
         if next_with_pos.is_empty() {
             return Vec::new();
@@ -120,9 +123,11 @@ impl<R: Rng> AI for McTreeAI<R> {
             node.children.push(Node::new(board.clone()));
         }
         let mut total_count = 0;
-        for _ in 0..self.target_count {
-            total_count += 1;
-            self.selection((total_count as f64).ln(), &mut node);
+        while start.elapsed() < self.limit {
+            for _ in 0..1000 {
+                total_count += 1;
+                self.selection((total_count as f64).ln(), &mut node);
+            }
         }
         let best = node
             .children

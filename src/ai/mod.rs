@@ -140,7 +140,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                 }
             })
         }
-        "mctree" => Ok(Box::new(McTreeAI::new(Rng::from_entropy()))),
+        "mctree" => Ok(Box::new(McTreeAI::new(Rng::from_entropy(), 1000, 2, 2.0))),
         "greedy" => {
             if args.len() != 1 {
                 return Err("greedy".to_string());
