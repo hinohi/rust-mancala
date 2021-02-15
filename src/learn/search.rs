@@ -1,7 +1,7 @@
 use fnv::FnvHashMap;
 use rand::Rng;
 
-use crate::ai::{MCTree, AI};
+use crate::ai::{RandomAI, AI};
 use crate::board::{compact_key, Board};
 
 fn raw_scores(board: &Board) -> i8 {
@@ -58,7 +58,7 @@ pub fn search(data: &mut FnvHashMap<u64, (i8, u8)>, board: Board, depth: u8) -> 
     Some((best_score, best_depth))
 }
 
-pub fn to_finish<R: Rng>(stealing: bool, ai: &mut MCTree<R>) -> Vec<Board> {
+pub fn to_finish<R: Rng>(stealing: bool, ai: &mut RandomAI<R>) -> Vec<Board> {
     let mut board = Board::new(stealing);
     let mut ret = vec![board.clone()];
     while !board.is_finished() {

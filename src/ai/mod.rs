@@ -1,14 +1,12 @@
 mod depth_search;
 mod evaluator;
 mod greedy;
-mod mctree;
 mod simple;
 mod utils;
 
 pub use self::depth_search::{DepthSearchAI, RandomDepthSearchAI};
 pub use self::evaluator::*;
 pub use self::greedy::GreedyAI;
-pub use self::mctree::{MCTree, WeightedMCTree};
 pub use self::simple::{InteractiveAI, RandomAI};
 pub use utils::ab_search;
 
@@ -92,19 +90,6 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                 "pos" => Box::new(DepthSearchAI::new(ScorePosEvaluator::new(), max_depth)),
                 "nn4" => Box::new(DepthSearchAI::new(NN4Evaluator::new(stealing), max_depth)),
                 "nn6" => Box::new(DepthSearchAI::new(NN6Evaluator::new(stealing), max_depth)),
-                "mc" => {
-                    if eval_args.len() != 2 {
-                        return Err("dfs:mc-(num):(max_depth)".to_string());
-                    }
-                    let num = match eval_args[1].parse() {
-                        Ok(d) => d,
-                        Err(e) => return Err(format!("dfs:mc-(num):(max_depth) {}", e)),
-                    };
-                    Box::new(DepthSearchAI::new(
-                        MCTreeEvaluator::new(Rng::from_entropy(), num),
-                        max_depth,
-                    ))
-                }
                 _ => {
                     return Err("dfs:(diff|pos|nn4|nn6|mc-(num)):(max_depth)".to_string());
                 }
@@ -150,50 +135,6 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                 )),
                 _ => {
                     return Err("rdfs:(diff|pos|nn4|nn6):(max_depth):(weight)".to_string());
-                }
-            })
-        }
-        "mctree" => {
-            if args.len() != 2 {
-                return Err("mctree:(num)".to_string());
-            }
-            let num = match args[1].parse::<u32>() {
-                Ok(e) => 1_u32 << e,
-                Err(e) => return Err(format!("mctree:(num) {}", e)),
-            };
-            Ok(Box::new(MCTree::new(num as usize, Rng::from_entropy())))
-        }
-        "weighted" => {
-            if args.len() != 3 {
-                return Err("weighted:(eval):(num)".to_string());
-            }
-            let num = match args[2].parse::<u32>() {
-                Ok(e) => 1_u32 << e,
-                Err(e) => return Err(format!("mctree:(num) {}", e)),
-            } as usize;
-            Ok(match args[1] {
-                "diff" => Box::new(WeightedMCTree::new(
-                    num,
-                    Rng::from_entropy(),
-                    ScoreDiffEvaluator::new(),
-                )),
-                "pos" => Box::new(WeightedMCTree::new(
-                    num,
-                    Rng::from_entropy(),
-                    ScorePosEvaluator::new(),
-                )),
-                "nn4" => Box::new(WeightedMCTree::new(
-                    num,
-                    Rng::from_entropy(),
-                    NN4Evaluator::new(stealing),
-                )),
-                "nn6" => Box::new(WeightedMCTree::new(
-                    num,
-                    Rng::from_entropy(),
-                    NN6Evaluator::new(stealing),
-                )),
-                _ => {
-                    return Err("weighted:(diff|pos|nn4|nn6):(num)".to_string());
                 }
             })
         }
