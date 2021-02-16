@@ -52,7 +52,7 @@ impl<R: Rng> McTreeAI<R> {
             if child.visited_count == 0 {
                 return i;
             }
-            let a = child.win_count as f64 / child.visited_count as f64;
+            let a = 1.0 - child.win_count as f64 / child.visited_count as f64;
             let b = self.c * (log_total_count / child.visited_count as f64).sqrt();
             weight.push(a + b);
         }
@@ -70,7 +70,7 @@ impl<R: Rng> McTreeAI<R> {
         if node.children.is_empty() {
             if node.board.is_finished() {
                 // 引き分けも勝ちに入れとく
-                return if node.board.score() <= 0 {
+                return if node.board.score() >= 0 {
                     node.is_win = Some(true);
                     node.win_count += 1;
                     true
@@ -81,7 +81,7 @@ impl<R: Rng> McTreeAI<R> {
             }
             if node.visited_count <= self.expansion_threshold {
                 let board = random_down(&mut self.rng, &node.board);
-                return if board.side() != node.board.side() {
+                return if board.side() == node.board.side() {
                     if board.score() >= 0 {
                         node.win_count += 1;
                         true

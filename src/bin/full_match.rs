@@ -3,13 +3,7 @@ use std::env::args;
 use mancala_rust::*;
 
 fn main() {
-    let list = [
-        "mctree:800:2:2",
-        "mctree:800:2:4",
-        "mctree:800:2:8",
-        "random",
-        "dfs:nn6:4",
-    ];
+    let list = ["mctree:800:2:2", "random", "dfs:nn6:4"];
     let args = args().collect::<Vec<_>>();
     let stealing = args[1].parse().unwrap();
     loop {
