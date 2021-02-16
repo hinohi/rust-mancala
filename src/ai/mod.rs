@@ -140,7 +140,15 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                 }
             })
         }
-        "mctree" => Ok(Box::new(McTreeAI::new(Rng::from_entropy(), 1000, 2, 2.0))),
+        "mctree" => {
+            if args.len() != 4 {
+                return Err("mctree:{limit}:{ex}:{c}".to_owned());
+            }
+            let limit = args[1].parse::<u64>().map_err(|e| e.to_string())?;
+            let ex = args[2].parse::<u32>().map_err(|e| e.to_string())?;
+            let c = args[2].parse::<f64>().map_err(|e| e.to_string())?;
+            Ok(Box::new(McTreeAI::new(Rng::from_entropy(), limit, ex, c)))
+        }
         "greedy" => {
             if args.len() != 1 {
                 return Err("greedy".to_string());
