@@ -59,7 +59,7 @@ pub fn random_down<R: Rng>(random: &mut R, board: &Board) -> Board {
 
 #[inline]
 pub fn soft_max(x: &mut [f64]) {
-    let max = x.iter().fold(std::f64::NAN, |x, v| x.max(*v));
+    let max = x.iter().fold(f64::NAN, |x, v| x.max(*v));
     x.iter_mut()
         .map(|v| {
             *v = (*v - max).exp();

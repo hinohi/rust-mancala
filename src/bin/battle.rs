@@ -9,7 +9,7 @@ fn main() {
         eprintln!("Usage: {} STEAL AI AI", args[0]);
         exit(1);
     }
-    let stealing = match args[1].parse() {
+    let stealing = match args[1].parse::<bool>() {
         Ok(b) => b,
         Err(e) => {
             eprintln!("{}", e);
