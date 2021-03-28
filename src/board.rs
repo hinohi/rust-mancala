@@ -1,17 +1,34 @@
-use std::collections::HashMap;
-use std::fmt::{self, Write};
+use std::{
+    collections::HashMap,
+    fmt::{self, Write},
+    hash::{Hash, Hasher},
+};
 
 use fnv::FnvHashSet;
 
 pub const PIT: usize = 6;
 pub const SEED: u8 = 4;
 
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Board {
     side: Side,
     stealing: bool,
     seeds: [[u8; PIT]; 2],
     score: [u8; 2],
+}
+
+impl Hash for Board {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        // side と stealing は実用上は hash に含める必要がないので除外してしまう
+        for &s in self.seeds[0].iter() {
+            state.write_u8(s);
+        }
+        for &s in self.seeds[1].iter() {
+            state.write_u8(s);
+        }
+        state.write_u8(self.score[0]);
+        state.write_u8(self.score[1]);
+    }
 }
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]

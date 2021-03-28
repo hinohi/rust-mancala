@@ -1,7 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 
-use rand_pcg::Mcg128Xsl64;
-
 use mancala_rust::{Board, DepthSearchAI, NN4Evaluator, NN6Evaluator, ScoreDiffEvaluator, AI};
 
 fn dfs5_with_stealing(c: &mut Criterion) {
