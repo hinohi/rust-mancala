@@ -5,13 +5,13 @@ authors = ["Daiju Nakayama <42.daiju@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-rand = "*"
-rand_pcg = "*"
-fnv = "*"
-lazy_static = "*"
-ndarray = { version = "*", features = ["serde-1"] }
-crossbeam = "*"
-indicatif = "*"
+rand = "0.8"
+rand_pcg = "0.3"
+fnv = "1.0"
+lazy_static = "1.4"
+ndarray = { version = "0.15", features = ["serde-1"] }
+crossbeam = { version = "0.8.0", optional = true }
+indicatif = { version = "0.16.0", optional = true }
 
 rust-nn = {version = "*", git = "https://github.com/hinohi/rust-nn" }
 
@@ -25,3 +25,10 @@ harness = false
 [[bench]]
 name = "board"
 harness = false
+
+[features]
+default = []
+make_hist = [
+    "crossbeam",
+    "indicatif",
+]

@@ -1,3 +1,4 @@
+#![cfg(feature = "make_hist")]
 use std::env::args;
 use std::thread::spawn;
 

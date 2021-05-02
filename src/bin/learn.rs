@@ -12,7 +12,7 @@ fn gen_case<I>(x: &mut Array2<Float>, t: &mut Array2<Float>, data: &mut I)
 where
     I: Iterator<Item = ([u8; 12], i8, u8)>,
 {
-    for (mut x, mut t) in x.genrows_mut().into_iter().zip(t.genrows_mut()) {
+    for (mut x, mut t) in x.rows_mut().into_iter().zip(t.rows_mut()) {
         let (board, score, _) = data.next().unwrap();
         for (x, b) in x.iter_mut().zip(board.iter()) {
             *x = Float::from(*b);
