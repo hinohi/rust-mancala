@@ -1,5 +1,4 @@
-use std::time::{Duration, Instant};
-
+use instant::{Duration, Instant};
 use rand::Rng;
 
 use super::{
