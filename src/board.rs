@@ -5,11 +5,14 @@ use std::{
 };
 
 use fnv::FnvHashSet;
+#[cfg(feature = "serde-1")]
+use serde::{Deserialize, Serialize};
 
 pub const PIT: usize = 6;
 pub const SEED: u8 = 4;
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde-1", derive(Deserialize, Serialize))]
 pub struct Board {
     side: Side,
     stealing: bool,
@@ -40,6 +43,7 @@ impl Hash for Board {
 }
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Side {
     First,
     Second,

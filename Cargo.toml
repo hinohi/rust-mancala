@@ -1,6 +1,6 @@
 [package]
 name = "mancala-rust"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Daiju Nakayama <42.daiju@gmail.com>"]
 edition = "2018"
 
@@ -12,6 +12,7 @@ lazy_static = "1.4"
 ndarray = { version = "0.15", features = ["serde-1"] }
 crossbeam = { version = "0.8.0", optional = true }
 indicatif = { version = "0.16.0", optional = true }
+serde = { version = "1", optional = true, features = ["derive"] }
 
 rust-nn = {version = "*", git = "https://github.com/hinohi/rust-nn" }
 
@@ -32,3 +33,4 @@ make_hist = [
     "crossbeam",
     "indicatif",
 ]
+serde-1 = ["serde"]
