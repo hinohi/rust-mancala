@@ -27,7 +27,7 @@ name = "board"
 harness = false
 
 [features]
-default = []
+default = ["make_hist"]
 make_hist = [
     "crossbeam",
     "indicatif",

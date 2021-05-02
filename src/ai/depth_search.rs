@@ -2,26 +2,26 @@ use rand::Rng;
 
 use super::{
     utils::{ab_search, choice_with_weight, soft_max},
-    Evaluator, Score, AI,
+    Evaluator, Score, Searcher,
 };
 use crate::board::Board;
 
 #[derive(Debug, Clone)]
-pub struct DepthSearchAI<E> {
+pub struct DepthSearcher<E> {
     max_depth: usize,
     evaluator: E,
 }
 
-impl<E> DepthSearchAI<E> {
-    pub fn new(evaluator: E, max_depth: usize) -> DepthSearchAI<E> {
-        DepthSearchAI {
+impl<E> DepthSearcher<E> {
+    pub fn new(evaluator: E, max_depth: usize) -> DepthSearcher<E> {
+        DepthSearcher {
             max_depth,
             evaluator,
         }
     }
 }
 
-impl<E> AI for DepthSearchAI<E>
+impl<E> Searcher for DepthSearcher<E>
 where
     E: Evaluator,
 {
@@ -51,21 +51,21 @@ where
 }
 
 #[derive(Debug, Clone)]
-pub struct RandomDepthSearchAI<E, R> {
+pub struct RandomDepthSearcher<E, R> {
     max_depth: usize,
     weight: f64,
     evaluator: E,
     random: R,
 }
 
-impl<E, R> RandomDepthSearchAI<E, R> {
+impl<E, R> RandomDepthSearcher<E, R> {
     pub fn new(
         max_depth: usize,
         weight: f64,
         evaluator: E,
         random: R,
-    ) -> RandomDepthSearchAI<E, R> {
-        RandomDepthSearchAI {
+    ) -> RandomDepthSearcher<E, R> {
+        RandomDepthSearcher {
             max_depth,
             weight,
             evaluator,
@@ -74,7 +74,7 @@ impl<E, R> RandomDepthSearchAI<E, R> {
     }
 }
 
-impl<E, R> AI for RandomDepthSearchAI<E, R>
+impl<E, R> Searcher for RandomDepthSearcher<E, R>
 where
     E: Evaluator,
     E::Score: Into<f64>,

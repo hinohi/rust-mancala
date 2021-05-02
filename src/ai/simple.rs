@@ -2,11 +2,11 @@ use std::io::stdin;
 
 use rand::{seq::SliceRandom, Rng};
 
-use super::{utils::ab_search, Evaluator, Score, AI};
+use super::{utils::ab_search, Evaluator, Score, Searcher};
 use crate::board::{Board, PIT};
 
 #[derive(Debug, Clone, Default)]
-pub struct InteractiveAI<E> {
+pub struct Interactive<E> {
     evaluator: E,
     max_depth: usize,
 }
@@ -29,12 +29,12 @@ fn get_suggest<E: Evaluator>(
     ret
 }
 
-impl<E> InteractiveAI<E>
+impl<E> Interactive<E>
 where
     E: Evaluator,
 {
-    pub fn new(evaluator: E, max_depth: usize) -> InteractiveAI<E> {
-        InteractiveAI {
+    pub fn new(evaluator: E, max_depth: usize) -> Interactive<E> {
+        Interactive {
             evaluator,
             max_depth,
         }
@@ -54,7 +54,7 @@ where
     }
 }
 
-impl<E> AI for InteractiveAI<E>
+impl<E> Searcher for Interactive<E>
 where
     E: Evaluator,
 {
@@ -80,17 +80,17 @@ where
 }
 
 #[derive(Debug, Clone)]
-pub struct RandomAI<R> {
+pub struct RandomSearcher<R> {
     random: R,
 }
 
-impl<R> RandomAI<R> {
-    pub fn new(random: R) -> RandomAI<R> {
-        RandomAI { random }
+impl<R> RandomSearcher<R> {
+    pub fn new(random: R) -> RandomSearcher<R> {
+        RandomSearcher { random }
     }
 }
 
-impl<R> AI for RandomAI<R>
+impl<R> Searcher for RandomSearcher<R>
 where
     R: Rng,
 {

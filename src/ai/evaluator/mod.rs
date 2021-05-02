@@ -71,14 +71,14 @@ impl Evaluator for ScorePosEvaluator {
 }
 
 #[derive(Debug, Clone)]
-pub struct MCTreeEvaluator<R> {
+pub struct McTreeEvaluator<R> {
     random: R,
     num: usize,
 }
 
-impl<R> MCTreeEvaluator<R> {
+impl<R> McTreeEvaluator<R> {
     pub fn new(random: R, num: usize) -> Self {
-        MCTreeEvaluator { random, num }
+        McTreeEvaluator { random, num }
     }
 
     pub fn set_num(&mut self, num: usize) {
@@ -86,7 +86,7 @@ impl<R> MCTreeEvaluator<R> {
     }
 }
 
-impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
+impl<R: Rng> Evaluator for McTreeEvaluator<R> {
     type Score = WinRateScore;
     fn eval(&mut self, board: &Board) -> Self::Score {
         let mut score = Self::Score::default();
@@ -99,15 +99,15 @@ impl<R: Rng> Evaluator for MCTreeEvaluator<R> {
 }
 
 #[derive(Debug, Clone)]
-pub struct WeightedMCTreeEvaluator<R, E> {
+pub struct WeightedMcTreeEvaluator<R, E> {
     random: R,
     eval: E,
     num: usize,
 }
 
-impl<R, E> WeightedMCTreeEvaluator<R, E> {
+impl<R, E> WeightedMcTreeEvaluator<R, E> {
     pub fn new(random: R, eval: E, num: usize) -> Self {
-        WeightedMCTreeEvaluator { random, eval, num }
+        WeightedMcTreeEvaluator { random, eval, num }
     }
 
     pub fn set_num(&mut self, num: usize) {
@@ -115,7 +115,7 @@ impl<R, E> WeightedMCTreeEvaluator<R, E> {
     }
 }
 
-impl<R, E> Evaluator for WeightedMCTreeEvaluator<R, E>
+impl<R, E> Evaluator for WeightedMcTreeEvaluator<R, E>
 where
     R: Rng,
     E: Evaluator,
@@ -162,26 +162,26 @@ fn nn_eval<R: Regression>(
 }
 
 #[derive(Debug, Clone)]
-pub struct NN4Evaluator {
+pub struct NeuralNet4Evaluator {
     nn: NN4Regression,
     input: Array1<rust_nn::Float>,
 }
 
-impl NN4Evaluator {
-    pub fn new(stealing: bool) -> NN4Evaluator {
+impl NeuralNet4Evaluator {
+    pub fn new(stealing: bool) -> NeuralNet4Evaluator {
         let mut model = if stealing {
             NN4_TRUE_MODEL
         } else {
             NN4_FALSE_MODEL
         };
-        NN4Evaluator {
+        NeuralNet4Evaluator {
             nn: NN4Regression::new(&mut model),
             input: Array1::zeros(12),
         }
     }
 }
 
-impl Evaluator for NN4Evaluator {
+impl Evaluator for NeuralNet4Evaluator {
     type Score = rust_nn::Float;
     fn eval(&mut self, board: &Board) -> Self::Score {
         nn_eval(&mut self.nn, &mut self.input, board)
@@ -189,26 +189,26 @@ impl Evaluator for NN4Evaluator {
 }
 
 #[derive(Debug, Clone)]
-pub struct NN6Evaluator {
+pub struct NeuralNet6Evaluator {
     nn: NN6Regression,
     input: Array1<rust_nn::Float>,
 }
 
-impl NN6Evaluator {
-    pub fn new(stealing: bool) -> NN6Evaluator {
+impl NeuralNet6Evaluator {
+    pub fn new(stealing: bool) -> NeuralNet6Evaluator {
         let mut model = if stealing {
             NN6_TRUE_MODEL
         } else {
             NN6_FALSE_MODEL
         };
-        NN6Evaluator {
+        NeuralNet6Evaluator {
             nn: NN6Regression::new(&mut model),
             input: Array1::zeros(12),
         }
     }
 }
 
-impl Evaluator for NN6Evaluator {
+impl Evaluator for NeuralNet6Evaluator {
     type Score = rust_nn::Float;
     fn eval(&mut self, board: &Board) -> Self::Score {
         nn_eval(&mut self.nn, &mut self.input, board)

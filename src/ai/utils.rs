@@ -3,10 +3,27 @@ use rand::Rng;
 use super::{Evaluator, Score};
 use crate::board::Board;
 
-#[derive(Copy, Clone, PartialOrd, PartialEq)]
-pub struct Ordable<F>(pub F);
+struct Ordable<F>(pub F);
+
+impl<F> PartialEq for Ordable<F>
+where
+    F: PartialEq,
+{
+    fn eq(&self, other: &Ordable<F>) -> bool {
+        self.0.eq(&other.0)
+    }
+}
 
 impl<F> Eq for Ordable<F> where F: PartialEq {}
+
+impl<F> PartialOrd for Ordable<F>
+where
+    F: PartialOrd,
+{
+    fn partial_cmp(&self, other: &Ordable<F>) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
+}
 
 impl<F> Ord for Ordable<F>
 where
@@ -110,7 +127,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{MCTreeEvaluator, ScoreDiffEvaluator, WinRateScore};
+    use crate::{McTreeEvaluator, ScoreDiffEvaluator, WinRateScore};
     use rand_pcg::Mcg128Xsl64;
 
     #[test]
@@ -127,7 +144,7 @@ mod tests {
 
     #[test]
     fn smoke_ab_search_mc() {
-        let mut eval = MCTreeEvaluator::new(Mcg128Xsl64::new(1), 10);
+        let mut eval = McTreeEvaluator::new(Mcg128Xsl64::new(1), 10);
         ab_search(
             Board::new(true),
             &mut eval,

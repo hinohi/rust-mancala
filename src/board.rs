@@ -9,13 +9,21 @@ use fnv::FnvHashSet;
 pub const PIT: usize = 6;
 pub const SEED: u8 = 4;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Board {
     side: Side,
     stealing: bool,
     seeds: [[u8; PIT]; 2],
     score: [u8; 2],
 }
+
+impl PartialEq for Board {
+    fn eq(&self, other: &Board) -> bool {
+        self.seeds.eq(&other.seeds) && self.score.eq(&other.score)
+    }
+}
+
+impl Eq for Board {}
 
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -110,12 +118,8 @@ impl Board {
     pub fn from_seeds(stealing: bool, seeds: &[u8]) -> Board {
         assert_eq!(seeds.len(), PIT * 2);
         let mut s = [[SEED; PIT]; 2];
-        for i in 0..PIT {
-            s[0][i] = seeds[i];
-        }
-        for i in 0..PIT {
-            s[1][i] = seeds[i + PIT];
-        }
+        s[0][..PIT].clone_from_slice(&seeds[..PIT]);
+        s[1][..PIT].clone_from_slice(&seeds[PIT..(PIT + PIT)]);
         Board {
             side: First,
             stealing,

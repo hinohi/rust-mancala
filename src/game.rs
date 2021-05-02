@@ -1,18 +1,18 @@
 use std::time::Instant;
 
-use super::AI;
+use super::Searcher;
 use crate::board::{Board, Side};
 
 pub struct Game {
     board: Board,
     turn: usize,
     show_board: bool,
-    ai_a: Box<dyn AI>,
-    ai_b: Box<dyn AI>,
+    ai_a: Box<dyn Searcher>,
+    ai_b: Box<dyn Searcher>,
 }
 
 impl Game {
-    pub fn new(stealing: bool, ai_a: Box<dyn AI>, ai_b: Box<dyn AI>) -> Game {
+    pub fn new(stealing: bool, ai_a: Box<dyn Searcher>, ai_b: Box<dyn Searcher>) -> Game {
         Game {
             board: Board::new(stealing),
             turn: 0,

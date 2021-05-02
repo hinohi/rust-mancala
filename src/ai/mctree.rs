@@ -4,7 +4,7 @@ use rand::Rng;
 
 use super::{
     utils::{choice_with_weight, random_down},
-    AI,
+    Searcher,
 };
 use crate::Board;
 
@@ -17,7 +17,7 @@ struct Node {
     children: Vec<Node>,
 }
 
-pub struct McTreeAI<R> {
+pub struct McTreeSearcher<R> {
     rng: R,
     limit: Duration,
     expansion_threshold: u32,
@@ -36,9 +36,9 @@ impl Node {
     }
 }
 
-impl<R: Rng> McTreeAI<R> {
-    pub fn new(rng: R, limit: u64, expansion_threshold: u32, c: f64) -> McTreeAI<R> {
-        McTreeAI {
+impl<R: Rng> McTreeSearcher<R> {
+    pub fn new(rng: R, limit: u64, expansion_threshold: u32, c: f64) -> McTreeSearcher<R> {
+        McTreeSearcher {
             rng,
             limit: Duration::from_millis(limit),
             expansion_threshold,
@@ -88,13 +88,11 @@ impl<R: Rng> McTreeAI<R> {
                     } else {
                         false
                     }
+                } else if board.score() <= 0 {
+                    node.win_count += 1;
+                    true
                 } else {
-                    if board.score() <= 0 {
-                        node.win_count += 1;
-                        true
-                    } else {
-                        false
-                    }
+                    false
                 };
             }
         }
@@ -111,7 +109,7 @@ impl<R: Rng> McTreeAI<R> {
     }
 }
 
-impl<R: Rng> AI for McTreeAI<R> {
+impl<R: Rng> Searcher for McTreeSearcher<R> {
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         let start = Instant::now();
         let next_with_pos = board.list_next_with_pos();

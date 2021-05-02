@@ -5,11 +5,11 @@ mod mctree;
 mod simple;
 mod utils;
 
-pub use self::depth_search::{DepthSearchAI, RandomDepthSearchAI};
+pub use self::depth_search::{DepthSearcher, RandomDepthSearcher};
 pub use self::evaluator::*;
-pub use self::greedy::GreedyAI;
-pub use self::mctree::McTreeAI;
-pub use self::simple::{InteractiveAI, RandomAI};
+pub use self::greedy::GreedySearcher;
+pub use self::mctree::McTreeSearcher;
+pub use self::simple::{Interactive, RandomSearcher};
 pub use utils::ab_search;
 
 use std::fmt::Debug;
@@ -19,7 +19,7 @@ use rand_pcg::Mcg128Xsl64 as Rng;
 
 use crate::board::Board;
 
-pub trait AI {
+pub trait Searcher {
     fn sow(&mut self, board: &Board) -> Vec<usize>;
 }
 
@@ -34,12 +34,12 @@ pub trait Score: PartialOrd + Copy + Debug {
     fn flip(&self) -> Self;
 }
 
-pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
+pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn Searcher>, String> {
     let args = s.split(':').collect::<Vec<_>>();
     match args[0] {
         "human" => {
             if args.len() == 1 {
-                return Ok(Box::new(InteractiveAI::new(ScoreDiffEvaluator::new(), 0)));
+                return Ok(Box::new(Interactive::new(ScoreDiffEvaluator::new(), 0)));
             }
             if args.len() != 3 {
                 return Err("human[:(eval):(max_depth)]".to_string());
@@ -50,10 +50,16 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
             };
             let eval_args = args[1].split('-').collect::<Vec<_>>();
             Ok(match eval_args[0] {
-                "diff" => Box::new(InteractiveAI::new(ScoreDiffEvaluator::new(), max_depth)),
-                "pos" => Box::new(InteractiveAI::new(ScorePosEvaluator::new(), max_depth)),
-                "nn4" => Box::new(InteractiveAI::new(NN4Evaluator::new(stealing), max_depth)),
-                "nn6" => Box::new(InteractiveAI::new(NN6Evaluator::new(stealing), max_depth)),
+                "diff" => Box::new(Interactive::new(ScoreDiffEvaluator::new(), max_depth)),
+                "pos" => Box::new(Interactive::new(ScorePosEvaluator::new(), max_depth)),
+                "nn4" => Box::new(Interactive::new(
+                    NeuralNet4Evaluator::new(stealing),
+                    max_depth,
+                )),
+                "nn6" => Box::new(Interactive::new(
+                    NeuralNet6Evaluator::new(stealing),
+                    max_depth,
+                )),
                 "mc" => {
                     if eval_args.len() != 2 {
                         return Err("human:mc-(num):(max_depth)".to_string());
@@ -62,8 +68,8 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
                         Ok(d) => d,
                         Err(e) => return Err(format!("human:mc-(num):(max_depth) {}", e)),
                     };
-                    Box::new(InteractiveAI::new(
-                        MCTreeEvaluator::new(Rng::from_entropy(), num),
+                    Box::new(Interactive::new(
+                        McTreeEvaluator::new(Rng::from_entropy(), num),
                         max_depth,
                     ))
                 }
@@ -76,7 +82,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
             if args.len() != 1 {
                 return Err("random".to_string());
             }
-            Ok(Box::new(RandomAI::new(Rng::from_entropy())))
+            Ok(Box::new(RandomSearcher::new(Rng::from_entropy())))
         }
         "dfs" => {
             if args.len() != 3 {
@@ -88,10 +94,16 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
             };
             let eval_args = args[1].split('-').collect::<Vec<_>>();
             Ok(match eval_args[0] {
-                "diff" => Box::new(DepthSearchAI::new(ScoreDiffEvaluator::new(), max_depth)),
-                "pos" => Box::new(DepthSearchAI::new(ScorePosEvaluator::new(), max_depth)),
-                "nn4" => Box::new(DepthSearchAI::new(NN4Evaluator::new(stealing), max_depth)),
-                "nn6" => Box::new(DepthSearchAI::new(NN6Evaluator::new(stealing), max_depth)),
+                "diff" => Box::new(DepthSearcher::new(ScoreDiffEvaluator::new(), max_depth)),
+                "pos" => Box::new(DepthSearcher::new(ScorePosEvaluator::new(), max_depth)),
+                "nn4" => Box::new(DepthSearcher::new(
+                    NeuralNet4Evaluator::new(stealing),
+                    max_depth,
+                )),
+                "nn6" => Box::new(DepthSearcher::new(
+                    NeuralNet6Evaluator::new(stealing),
+                    max_depth,
+                )),
                 _ => {
                     return Err("dfs:(diff|pos|nn4|nn6|mc-(num)):(max_depth)".to_string());
                 }
@@ -111,28 +123,28 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
             };
             let random = Rng::from_entropy();
             Ok(match args[1] {
-                "diff" => Box::new(RandomDepthSearchAI::new(
+                "diff" => Box::new(RandomDepthSearcher::new(
                     max_depth,
                     weight,
                     ScoreDiffEvaluator::new(),
                     random,
                 )),
-                "pos" => Box::new(RandomDepthSearchAI::new(
+                "pos" => Box::new(RandomDepthSearcher::new(
                     max_depth,
                     weight,
                     ScorePosEvaluator::new(),
                     random,
                 )),
-                "nn4" => Box::new(RandomDepthSearchAI::new(
+                "nn4" => Box::new(RandomDepthSearcher::new(
                     max_depth,
                     weight,
-                    NN4Evaluator::new(stealing),
+                    NeuralNet4Evaluator::new(stealing),
                     random,
                 )),
-                "nn6" => Box::new(RandomDepthSearchAI::new(
+                "nn6" => Box::new(RandomDepthSearcher::new(
                     max_depth,
                     weight,
-                    NN6Evaluator::new(stealing),
+                    NeuralNet6Evaluator::new(stealing),
                     random,
                 )),
                 _ => {
@@ -147,13 +159,18 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn AI>, String> {
             let limit = args[1].parse::<u64>().map_err(|e| e.to_string())?;
             let ex = args[2].parse::<u32>().map_err(|e| e.to_string())?;
             let c = args[2].parse::<f64>().map_err(|e| e.to_string())?;
-            Ok(Box::new(McTreeAI::new(Rng::from_entropy(), limit, ex, c)))
+            Ok(Box::new(McTreeSearcher::new(
+                Rng::from_entropy(),
+                limit,
+                ex,
+                c,
+            )))
         }
         "greedy" => {
             if args.len() != 1 {
                 return Err("greedy".to_string());
             }
-            Ok(Box::new(GreedyAI::new(stealing, Rng::from_entropy())))
+            Ok(Box::new(GreedySearcher::new(stealing, Rng::from_entropy())))
         }
         _ => Err("(human|random|dfs|rdfs|mctree|weighted|greedy)".to_string()),
     }

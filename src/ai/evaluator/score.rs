@@ -52,12 +52,10 @@ impl WinRateScore {
     }
 
     pub fn count(&mut self, score: i32) {
-        if score > 0 {
-            self.win += 1;
-        } else if score == 0 {
-            self.draw += 1;
-        } else {
-            self.lose += 1;
+        match score {
+            0 => self.draw += 1,
+            s if s > 0 => self.win += 1,
+            _ => self.lose += 1,
         }
         self.score += score;
     }

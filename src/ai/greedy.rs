@@ -1,24 +1,24 @@
 use rand::Rng;
 
-use super::AI;
+use super::Searcher;
 use crate::board::{Board, PIT};
 
 #[derive(Debug, Clone)]
-pub struct GreedyAI<R> {
+pub struct GreedySearcher<R> {
     stealing: bool,
     random: R,
 }
 
-impl<R> GreedyAI<R>
+impl<R> GreedySearcher<R>
 where
     R: Rng,
 {
-    pub fn new(stealing: bool, random: R) -> GreedyAI<R> {
-        GreedyAI { stealing, random }
+    pub fn new(stealing: bool, random: R) -> GreedySearcher<R> {
+        GreedySearcher { stealing, random }
     }
 }
 
-impl<R> AI for GreedyAI<R>
+impl<R> Searcher for GreedySearcher<R>
 where
     R: Rng,
 {

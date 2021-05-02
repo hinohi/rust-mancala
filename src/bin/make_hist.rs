@@ -7,7 +7,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use rand::Rng;
 use rand_pcg::Mcg128Xsl64;
 
-use mancala_rust::{ab_search, learn::*, Board, NN6Evaluator};
+use mancala_rust::{ab_search, learn::*, Board, NeuralNet6Evaluator};
 use rust_nn::Float;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -56,7 +56,7 @@ impl Hist {
 }
 
 fn worker(stealing: bool, depth: usize, r: Receiver<(Board, i8)>, s: Sender<Float>) {
-    let mut eval = NN6Evaluator::new(stealing);
+    let mut eval = NeuralNet6Evaluator::new(stealing);
     while let Ok((board, exact)) = r.recv() {
         let score = ab_search(board, &mut eval, depth, -1e10, 1e10);
         s.send(score - exact as Float).unwrap();
