@@ -1,12 +1,13 @@
 [package]
 name = "mancala-rust"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Daiju Nakayama <42.daiju@gmail.com>"]
 edition = "2024"
 
 [dependencies]
 rand = "0.9"
 rand_pcg = "0.9"
+getrandom = { version = "0.3", features = ["wasm_js"] }
 fnv = "1"
 lazy_static = "1.5"
 ndarray = { version = "0.16", features = ["serde"] }
