@@ -2,7 +2,7 @@ use fnv::FnvHashMap;
 use rand::Rng;
 
 use crate::ai::{RandomSearcher, Searcher};
-use crate::board::{compact_key, Board};
+use crate::board::{Board, compact_key};
 
 fn raw_scores(board: &Board) -> i8 {
     board.score()

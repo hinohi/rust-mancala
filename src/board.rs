@@ -105,7 +105,7 @@ impl fmt::Display for Board {
         )
         .unwrap();
         write!(s, "{:2}|", self.score[0]).unwrap();
-        write!(dest, "{}", s)
+        write!(dest, "{s}")
     }
 }
 
@@ -407,12 +407,12 @@ mod tests {
         fn test(b: &Board) {
             let k = compact_key(b);
             let v = from_compact_key(k);
-            println!("{}\n{} {:?}", b, k, v);
-            for i in 0..6 {
-                assert_eq!(b.self_seeds()[i], v[i]);
+            println!("{b}\n{k} {v:?}");
+            for (i, &seed) in b.self_seeds().iter().enumerate() {
+                assert_eq!(seed, v[i]);
             }
-            for i in 0..6 {
-                assert_eq!(b.opposite_seed()[i], v[6 + i]);
+            for (i, &seed) in b.opposite_seed().iter().enumerate() {
+                assert_eq!(seed, v[6 + i]);
             }
         }
 

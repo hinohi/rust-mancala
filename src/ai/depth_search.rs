@@ -1,8 +1,8 @@
 use rand::Rng;
 
 use super::{
-    utils::{ab_search, choice_with_weight, soft_max},
     Evaluator, Score, Searcher,
+    utils::{ab_search, choice_with_weight, soft_max},
 };
 use crate::board::Board;
 

@@ -8,13 +8,13 @@ use crate::board::{PIT, SEED};
 use crate::from_compact_key;
 
 pub fn db_name(stealing: bool) -> String {
-    format!("p{}s{}_{}.dat", PIT, SEED, stealing)
+    format!("p{PIT}s{SEED}_{stealing}.dat")
 }
 
 pub fn load(name: &str) -> FnvHashMap<u64, (i8, u8)> {
     let mut f = match std::fs::File::open(name) {
         Err(e) => {
-            eprintln!("{} is not exists ({})", name, e);
+            eprintln!("{name} is not exists ({e})");
             return FnvHashMap::with_capacity_and_hasher(7 * 1024, Default::default());
         }
         Ok(f) => std::io::BufReader::new(f),
@@ -23,7 +23,7 @@ pub fn load(name: &str) -> FnvHashMap<u64, (i8, u8)> {
         let mut buf = [0; 8];
         match f.read_exact(&mut buf) {
             Err(e) => {
-                eprintln!("read size failed: {}", e);
+                eprintln!("read size failed: {e}");
                 return FnvHashMap::with_capacity_and_hasher(7 * 1024, Default::default());
             }
             Ok(()) => u64::from_le_bytes(buf) as usize,
@@ -36,7 +36,7 @@ pub fn load(name: &str) -> FnvHashMap<u64, (i8, u8)> {
         let mut buf = [0; 8];
         let key = match f.read_exact(&mut buf) {
             Err(e) => {
-                eprintln!("read {}th key failed: {}", i, e);
+                eprintln!("read {i}th key failed: {e}");
                 return data;
             }
             Ok(()) => u64::from_le_bytes(buf),
@@ -44,7 +44,7 @@ pub fn load(name: &str) -> FnvHashMap<u64, (i8, u8)> {
         let mut buf = [0; 2];
         let value = match f.read_exact(&mut buf) {
             Err(e) => {
-                eprintln!("read {}th value failed: {}", i, e);
+                eprintln!("read {i}th value failed: {e}");
                 return data;
             }
             Ok(()) => (buf[0] as i8, buf[1]),
@@ -55,7 +55,7 @@ pub fn load(name: &str) -> FnvHashMap<u64, (i8, u8)> {
 }
 
 pub fn save(name: &str, data: &FnvHashMap<u64, (i8, u8)>) -> std::io::Result<()> {
-    let mut f = std::io::BufWriter::new(std::fs::File::create(&name)?);
+    let mut f = std::io::BufWriter::new(std::fs::File::create(name)?);
     f.write_all(&(data.len() as u64).to_le_bytes())?;
     for (key, value) in data.iter() {
         f.write_all(&key.to_le_bytes())?;
@@ -164,7 +164,7 @@ where
 {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
-        let idx = self.random.gen_range(0..self.buf.len());
+        let idx = self.random.random_range(0..self.buf.len());
         let item = self.buf.swap_remove(idx);
         self.buf.push(self.iter.next().unwrap());
         Some(item)

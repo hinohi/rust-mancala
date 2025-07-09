@@ -2,12 +2,12 @@
 use std::env::args;
 use std::thread::spawn;
 
-use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
+use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
 use indicatif::{ProgressBar, ProgressStyle};
 use rand::Rng;
 use rand_pcg::Mcg128Xsl64;
 
-use mancala_rust::{ab_search, learn::*, Board, NeuralNet6Evaluator};
+use mancala_rust::{Board, NeuralNet6Evaluator, ab_search, learn::*};
 use rust_nn::Float;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -89,14 +89,15 @@ fn main() {
         let bar = ProgressBar::new(n as u64);
         bar.set_style(
             ProgressStyle::default_bar()
-                .template("{bar:40.cyan/blue} {pos}/{len} [{elapsed_precise}/{eta_precise}]"),
+                .template("{bar:40.cyan/blue} {pos}/{len} [{elapsed_precise}/{eta_precise}]")
+                .unwrap(),
         );
         let mut r = Mcg128Xsl64::new(1);
         for (i, (seeds, exact, _)) in db.enumerate() {
             if (i + 1) % 1048576 == 0 {
                 bar.inc(1048576);
             }
-            if use_rate >= 1.0 || r.gen_range(0.0..1.0) < use_rate {
+            if use_rate >= 1.0 || r.random_range(0.0..1.0) < use_rate {
                 board_s
                     .send((Board::from_seeds(stealing, &seeds), exact))
                     .unwrap();

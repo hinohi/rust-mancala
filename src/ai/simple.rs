@@ -1,8 +1,8 @@
 use std::io::stdin;
 
-use rand::{seq::SliceRandom, Rng};
+use rand::{Rng, prelude::IndexedRandom};
 
-use super::{utils::ab_search, Evaluator, Score, Searcher};
+use super::{Evaluator, Score, Searcher, utils::ab_search};
 use crate::board::{Board, PIT};
 
 #[derive(Debug, Clone, Default)]
@@ -47,8 +47,8 @@ where
             .enumerate()
         {
             match best {
-                Some(ref best) => eprintln!("{} {:?}", pos, best),
-                None => eprintln!("{} *", pos),
+                Some(best) => eprintln!("{pos} {best:?}"),
+                None => eprintln!("{pos} *"),
             }
         }
     }
@@ -71,9 +71,9 @@ where
                     Ok(_) => {
                         return vec![i];
                     }
-                    Err(e) => eprintln!("{}", e),
+                    Err(e) => eprintln!("{e}"),
                 },
-                Err(e) => eprintln!("{}", e),
+                Err(e) => eprintln!("{e}"),
             }
         }
     }

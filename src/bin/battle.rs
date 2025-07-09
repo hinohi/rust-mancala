@@ -12,21 +12,21 @@ fn main() {
     let stealing = match args[1].parse::<bool>() {
         Ok(b) => b,
         Err(e) => {
-            eprintln!("{}", e);
+            eprintln!("{e}");
             exit(1);
         }
     };
     let a = match build_ai(stealing, &args[2]) {
         Ok(ai) => ai,
         Err(e) => {
-            eprintln!("Usage: {}", e);
+            eprintln!("Usage: {e}");
             exit(1);
         }
     };
     let b = match build_ai(stealing, &args[3]) {
         Ok(ai) => ai,
         Err(e) => {
-            eprintln!("Usage: {}", e);
+            eprintln!("Usage: {e}");
             exit(1);
         }
     };
@@ -38,5 +38,5 @@ fn main() {
     game.show_board(true);
     game.first_sow(&first_sow);
     let (a, b) = game.run();
-    println!("{} {}", a, b);
+    println!("{a} {b}");
 }

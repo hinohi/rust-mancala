@@ -15,7 +15,7 @@ fn main() {
                     build_ai(stealing, b).unwrap(),
                 );
                 let (sa, sb) = game.run();
-                println!("{} {} {} {}", a, b, sa, sb);
+                println!("{a} {b} {sa} {sb}");
             }
         }
     }

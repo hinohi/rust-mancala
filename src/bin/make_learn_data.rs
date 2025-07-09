@@ -3,11 +3,11 @@ use std::env::args;
 use rand::SeedableRng;
 use rand_pcg::Mcg128Xsl64;
 
-use mancala_rust::{learn::*, RandomSearcher};
+use mancala_rust::{RandomSearcher, learn::*};
 
 fn main() {
     let stealing = args().nth(1).expect("USAGE: <stealing>").parse().unwrap();
-    let mut ai = RandomSearcher::new(Mcg128Xsl64::from_entropy());
+    let mut ai = RandomSearcher::new(Mcg128Xsl64::from_rng(&mut rand::rng()));
     let mut data = load(&db_name(stealing));
     for i in 1..=30_000 {
         let mut path = to_finish(stealing, &mut ai);
@@ -29,7 +29,7 @@ fn main() {
         hist[*depth as usize] += 1;
     }
     for (depth, count) in hist.iter().enumerate() {
-        println!("{} {}", depth, count);
+        println!("{depth} {count}");
         if *count == 0 {
             break;
         }

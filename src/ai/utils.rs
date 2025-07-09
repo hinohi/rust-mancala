@@ -21,7 +21,7 @@ where
     F: PartialOrd,
 {
     fn partial_cmp(&self, other: &Ordable<F>) -> Option<std::cmp::Ordering> {
-        self.0.partial_cmp(&other.0)
+        Some(self.cmp(other))
     }
 }
 
@@ -30,7 +30,7 @@ where
     F: PartialOrd,
 {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.partial_cmp(other).unwrap()
+        self.0.partial_cmp(&other.0).unwrap()
     }
 }
 
@@ -68,7 +68,7 @@ pub fn random_down<R: Rng>(random: &mut R, board: &Board) -> Board {
         if next_list.is_empty() {
             break;
         }
-        let idx = random.gen_range(0..next_list.len());
+        let idx = random.random_range(0..next_list.len());
         board = next_list.swap_remove(idx);
     }
     board
@@ -87,7 +87,7 @@ pub fn soft_max(x: &mut [f64]) {
 #[inline]
 pub fn choice_with_weight<R: Rng>(random: &mut R, weight: &[f64]) -> usize {
     let sum = weight.iter().fold(0.0, |x, y| x + *y);
-    let r = random.gen_range(0.0..sum);
+    let r = random.random_range(0.0..sum);
     let mut p = 0.0;
     for (i, w) in weight.iter().enumerate() {
         p += *w;

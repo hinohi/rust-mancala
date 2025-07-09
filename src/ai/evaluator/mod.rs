@@ -4,8 +4,8 @@ use ndarray::Array1;
 use rand::Rng;
 use rust_nn::predict::{NN4Regression, NN6Regression, Regression};
 
-use super::utils::{random_down, random_down_with_weight};
 use super::Evaluator;
+use super::utils::{random_down, random_down_with_weight};
 use crate::board::Board;
 pub use score::*;
 
@@ -91,7 +91,7 @@ impl<R: Rng> Evaluator for McTreeEvaluator<R> {
     fn eval(&mut self, board: &Board) -> Self::Score {
         let mut score = Self::Score::default();
         for _ in 0..self.num {
-            let s = random_down(&mut self.random, &board).last_score();
+            let s = random_down(&mut self.random, board).last_score();
             score.count(i32::from(s));
         }
         score

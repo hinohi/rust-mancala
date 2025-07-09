@@ -6,7 +6,7 @@ use rand::SeedableRng;
 use rand_pcg::Mcg128Xsl64;
 
 use mancala_rust::learn::{RepeatLod, ShuffledStream};
-use rust_nn::{train::*, Float};
+use rust_nn::{Float, train::*};
 
 fn gen_case<I>(x: &mut Array2<Float>, t: &mut Array2<Float>, data: &mut I)
 where
@@ -51,7 +51,7 @@ fn main() {
     let mut t = Array2::zeros([batch_size, 1]);
     let mut data = ShuffledStream::new(
         RepeatLod::new(db_path),
-        Mcg128Xsl64::from_entropy(),
+        Mcg128Xsl64::from_rng(&mut rand::rng()),
         batch_size * 1024,
     );
     let mut epoch = 0_u64;
@@ -65,7 +65,7 @@ fn main() {
             loss = 0.0;
         }
         if epoch % 100_000 == 0 {
-            let mut f = BufWriter::new(File::create(&save_path).unwrap());
+            let mut f = BufWriter::new(File::create(save_path).unwrap());
             model.encode(&mut f);
         }
     }

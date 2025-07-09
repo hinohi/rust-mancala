@@ -2,8 +2,8 @@ use instant::{Duration, Instant};
 use rand::Rng;
 
 use super::{
-    utils::{choice_with_weight, random_down},
     Searcher,
+    utils::{choice_with_weight, random_down},
 };
 use crate::Board;
 

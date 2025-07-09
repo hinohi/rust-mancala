@@ -14,7 +14,7 @@ pub use utils::ab_search;
 
 use std::fmt::Debug;
 
-use rand::SeedableRng;
+use rand::{SeedableRng, rng};
 use rand_pcg::Mcg128Xsl64 as Rng;
 
 use crate::board::Board;
@@ -46,7 +46,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn Searcher>, String> {
             }
             let max_depth = match args[2].parse() {
                 Ok(d) => d,
-                Err(e) => return Err(format!("human[:(eval):(max_depth)] {}", e)),
+                Err(e) => return Err(format!("human[:(eval):(max_depth)] {e}")),
             };
             let eval_args = args[1].split('-').collect::<Vec<_>>();
             Ok(match eval_args[0] {
@@ -66,10 +66,10 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn Searcher>, String> {
                     }
                     let num = match eval_args[1].parse() {
                         Ok(d) => d,
-                        Err(e) => return Err(format!("human:mc-(num):(max_depth) {}", e)),
+                        Err(e) => return Err(format!("human:mc-(num):(max_depth) {e}")),
                     };
                     Box::new(Interactive::new(
-                        McTreeEvaluator::new(Rng::from_entropy(), num),
+                        McTreeEvaluator::new(Rng::from_rng(&mut rng()), num),
                         max_depth,
                     ))
                 }
@@ -82,7 +82,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn Searcher>, String> {
             if args.len() != 1 {
                 return Err("random".to_string());
             }
-            Ok(Box::new(RandomSearcher::new(Rng::from_entropy())))
+            Ok(Box::new(RandomSearcher::new(Rng::from_rng(&mut rng()))))
         }
         "dfs" => {
             if args.len() != 3 {
@@ -90,7 +90,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn Searcher>, String> {
             }
             let max_depth = match args[2].parse() {
                 Ok(d) => d,
-                Err(e) => return Err(format!("dfs:(eval):(max_depth) {}", e)),
+                Err(e) => return Err(format!("dfs:(eval):(max_depth) {e}")),
             };
             let eval_args = args[1].split('-').collect::<Vec<_>>();
             Ok(match eval_args[0] {
@@ -115,13 +115,13 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn Searcher>, String> {
             }
             let max_depth = match args[2].parse() {
                 Ok(d) => d,
-                Err(e) => return Err(format!("max_depth must be usize: {}", e)),
+                Err(e) => return Err(format!("max_depth must be usize: {e}")),
             };
             let weight = match args[3].parse() {
                 Ok(w) => w,
-                Err(e) => return Err(format!("weight must be f64: {}", e)),
+                Err(e) => return Err(format!("weight must be f64: {e}")),
             };
-            let random = Rng::from_entropy();
+            let random = Rng::from_rng(&mut rng());
             Ok(match args[1] {
                 "diff" => Box::new(RandomDepthSearcher::new(
                     max_depth,
@@ -160,7 +160,7 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn Searcher>, String> {
             let ex = args[2].parse::<u32>().map_err(|e| e.to_string())?;
             let c = args[2].parse::<f64>().map_err(|e| e.to_string())?;
             Ok(Box::new(McTreeSearcher::new(
-                Rng::from_entropy(),
+                Rng::from_rng(&mut rng()),
                 limit,
                 ex,
                 c,
@@ -170,7 +170,10 @@ pub fn build_ai(stealing: bool, s: &str) -> Result<Box<dyn Searcher>, String> {
             if args.len() != 1 {
                 return Err("greedy".to_string());
             }
-            Ok(Box::new(GreedySearcher::new(stealing, Rng::from_entropy())))
+            Ok(Box::new(GreedySearcher::new(
+                stealing,
+                Rng::from_rng(&mut rng()),
+            )))
         }
         _ => Err("(human|random|dfs|rdfs|mctree|weighted|greedy)".to_string()),
     }
