@@ -1,5 +1,5 @@
 use fnv::FnvHashMap;
-use rand::Rng;
+use rand::RngExt;
 
 use crate::ai::{RandomSearcher, Searcher};
 use crate::board::{Board, compact_key};
@@ -58,7 +58,7 @@ pub fn search(data: &mut FnvHashMap<u64, (i8, u8)>, board: Board, depth: u8) -> 
     Some((best_score, best_depth))
 }
 
-pub fn to_finish<R: Rng>(stealing: bool, ai: &mut RandomSearcher<R>) -> Vec<Board> {
+pub fn to_finish<R: RngExt>(stealing: bool, ai: &mut RandomSearcher<R>) -> Vec<Board> {
     let mut board = Board::new(stealing);
     let mut ret = vec![board.clone()];
     while !board.is_finished() {

@@ -2,7 +2,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 
 use fnv::FnvHashMap;
-use rand::Rng;
+use rand::RngExt;
 
 use crate::board::{PIT, SEED};
 use crate::from_compact_key;
@@ -145,7 +145,7 @@ where
 impl<I, R> ShuffledStream<I, R>
 where
     I: Iterator,
-    R: Rng,
+    R: RngExt,
 {
     pub fn new(iter: I, random: R, buffer: usize) -> ShuffledStream<I, R> {
         let mut iter = iter;
@@ -160,7 +160,7 @@ where
 impl<I, R> Iterator for ShuffledStream<I, R>
 where
     I: Iterator,
-    R: Rng,
+    R: RngExt,
 {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {

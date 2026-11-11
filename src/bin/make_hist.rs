@@ -4,7 +4,7 @@ use std::thread::spawn;
 
 use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
 use indicatif::{ProgressBar, ProgressStyle};
-use rand::Rng;
+use rand::RngExt;
 use rand_pcg::Mcg128Xsl64;
 
 use mancala_rust::{Board, NeuralNet6Evaluator, ab_search, learn::*};

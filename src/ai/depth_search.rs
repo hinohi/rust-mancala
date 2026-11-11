@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 
 use super::{
     Evaluator, Score, Searcher,
@@ -78,7 +78,7 @@ impl<E, R> Searcher for RandomDepthSearcher<E, R>
 where
     E: Evaluator,
     E::Score: Into<f64>,
-    R: Rng,
+    R: RngExt,
 {
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         let mut next_lists = board.list_next_with_pos();

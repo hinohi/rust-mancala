@@ -1,7 +1,7 @@
 mod score;
 
 use ndarray::Array1;
-use rand::Rng;
+use rand::RngExt;
 use rust_nn::predict::{NN4Regression, NN6Regression, Regression};
 
 use super::Evaluator;
@@ -86,7 +86,7 @@ impl<R> McTreeEvaluator<R> {
     }
 }
 
-impl<R: Rng> Evaluator for McTreeEvaluator<R> {
+impl<R: RngExt> Evaluator for McTreeEvaluator<R> {
     type Score = WinRateScore;
     fn eval(&mut self, board: &Board) -> Self::Score {
         let mut score = Self::Score::default();
@@ -117,7 +117,7 @@ impl<R, E> WeightedMcTreeEvaluator<R, E> {
 
 impl<R, E> Evaluator for WeightedMcTreeEvaluator<R, E>
 where
-    R: Rng,
+    R: RngExt,
     E: Evaluator,
     E::Score: Into<f64>,
 {

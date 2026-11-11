@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 
 use super::Searcher;
 use crate::board::{Board, PIT};
@@ -11,7 +11,7 @@ pub struct GreedySearcher<R> {
 
 impl<R> GreedySearcher<R>
 where
-    R: Rng,
+    R: RngExt,
 {
     pub fn new(stealing: bool, random: R) -> GreedySearcher<R> {
         GreedySearcher { stealing, random }
@@ -20,7 +20,7 @@ where
 
 impl<R> Searcher for GreedySearcher<R>
 where
-    R: Rng,
+    R: RngExt,
 {
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         let mut board = board.clone();

@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 
 use super::{Evaluator, Score};
 use crate::board::Board;
@@ -61,7 +61,7 @@ pub fn ab_search<E: Evaluator>(
     alpha
 }
 
-pub fn random_down<R: Rng>(random: &mut R, board: &Board) -> Board {
+pub fn random_down<R: RngExt>(random: &mut R, board: &Board) -> Board {
     let mut board = board.clone();
     loop {
         let mut next_list = board.list_next().drain().collect::<Vec<_>>();
@@ -85,7 +85,7 @@ pub fn soft_max(x: &mut [f64]) {
 }
 
 #[inline]
-pub fn choice_with_weight<R: Rng>(random: &mut R, weight: &[f64]) -> usize {
+pub fn choice_with_weight<R: RngExt>(random: &mut R, weight: &[f64]) -> usize {
     let sum = weight.iter().fold(0.0, |x, y| x + *y);
     let r = random.random_range(0.0..sum);
     let mut p = 0.0;
@@ -100,7 +100,7 @@ pub fn choice_with_weight<R: Rng>(random: &mut R, weight: &[f64]) -> usize {
 
 pub fn random_down_with_weight<R, E>(random: &mut R, eval: &mut E, board: Board) -> Board
 where
-    R: Rng,
+    R: RngExt,
     E: Evaluator,
     E::Score: Into<f64>,
 {

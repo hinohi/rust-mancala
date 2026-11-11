@@ -1,16 +1,16 @@
 [package]
 name = "mancala-rust"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Daiju Nakayama <42.daiju@gmail.com>"]
 edition = "2024"
 
 [dependencies]
-rand = "0.9"
-rand_pcg = "0.9"
-getrandom = { version = "0.3", features = ["wasm_js"] }
+rand = "0.10"
+rand_pcg = "0.10"
+getrandom = { version = "0.4", features = ["wasm_js"] }
 fnv = "1"
 lazy_static = "1.5"
-ndarray = { version = "0.16", features = ["serde"] }
+ndarray = { version = "0.17", features = ["serde"] }
 crossbeam = { version = "0.8", optional = true }
 indicatif = { version = "0.18", optional = true }
 serde = { version = "1", optional = true, features = ["derive"] }
@@ -19,7 +19,7 @@ instant = "0.1"
 rust-nn = {version = "*", git = "https://github.com/hinohi/rust-nn" }
 
 [dev-dependencies]
-criterion = "0.6"
+criterion = "0.8"
 
 [[bench]]
 name = "ai"

@@ -1,5 +1,5 @@
 use instant::{Duration, Instant};
-use rand::Rng;
+use rand::RngExt;
 
 use super::{
     Searcher,
@@ -35,7 +35,7 @@ impl Node {
     }
 }
 
-impl<R: Rng> McTreeSearcher<R> {
+impl<R: RngExt> McTreeSearcher<R> {
     pub fn new(rng: R, limit: u64, expansion_threshold: u32, c: f64) -> McTreeSearcher<R> {
         McTreeSearcher {
             rng,
@@ -108,7 +108,7 @@ impl<R: Rng> McTreeSearcher<R> {
     }
 }
 
-impl<R: Rng> Searcher for McTreeSearcher<R> {
+impl<R: RngExt> Searcher for McTreeSearcher<R> {
     fn sow(&mut self, board: &Board) -> Vec<usize> {
         let start = Instant::now();
         let next_with_pos = board.list_next_with_pos();
