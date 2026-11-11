@@ -1,5 +1,5 @@
-use instant::{Duration, Instant};
 use rand::RngExt;
+use web_time::{Duration, Instant};
 
 use super::{
     Searcher,
